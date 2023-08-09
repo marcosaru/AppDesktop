@@ -1,0 +1,79 @@
+object FrmConfigVenda: TFrmConfigVenda
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'Configurar Venda'
+  ClientHeight = 455
+  ClientWidth = 584
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel
+    Left = 8
+    Top = 8
+    Width = 146
+    Height = 13
+    Caption = 'Mensagem padr'#227'o para Venda'
+  end
+  object Label2: TLabel
+    Left = 8
+    Top = 136
+    Width = 166
+    Height = 13
+    Caption = 'Mensagem padr'#227'o para pr'#233'-venda'
+  end
+  object Label3: TLabel
+    Left = 8
+    Top = 264
+    Width = 167
+    Height = 13
+    Caption = 'Mensagem padr'#227'o para or'#231'amento'
+  end
+  object Edt_ObservacoesVenda: TMemo
+    Left = 8
+    Top = 27
+    Width = 273
+    Height = 97
+    TabOrder = 0
+  end
+  object Edt_ObservacoesPreV: TMemo
+    Left = 8
+    Top = 155
+    Width = 273
+    Height = 97
+    TabOrder = 1
+  end
+  object Edt_ObservacoesOrcamento: TMemo
+    Left = 8
+    Top = 283
+    Width = 273
+    Height = 97
+    TabOrder = 2
+  end
+  object btnConfirmar: TButton
+    Left = 296
+    Top = 412
+    Width = 75
+    Height = 25
+    Caption = 'Confirmar'
+    TabOrder = 3
+    OnClick = btnConfirmarClick
+  end
+  object btnCancelar: TButton
+    Left = 206
+    Top = 412
+    Width = 75
+    Height = 25
+    Caption = 'Cancelar'
+    TabOrder = 4
+  end
+end
