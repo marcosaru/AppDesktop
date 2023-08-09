@@ -1,0 +1,110 @@
+object FrmCadMunicipio: TFrmCadMunicipio
+  Left = 0
+  Top = 0
+  Caption = 'Cadastrar Municipio'
+  ClientHeight = 123
+  ClientWidth = 551
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 407
+    Height = 123
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 0
+    ExplicitTop = -1
+    ExplicitWidth = 432
+    ExplicitHeight = 197
+    object Label1: TLabel
+      Left = 27
+      Top = 27
+      Width = 33
+      Height = 13
+      Caption = 'C'#243'digo'
+    end
+    object Label2: TLabel
+      Left = 27
+      Top = 54
+      Width = 43
+      Height = 13
+      Caption = 'Municipio'
+    end
+    object Label3: TLabel
+      Left = 27
+      Top = 83
+      Width = 33
+      Height = 13
+      Caption = 'Estado'
+    end
+    object Edt_Codigo: TEdit
+      Left = 72
+      Top = 24
+      Width = 41
+      Height = 21
+      Enabled = False
+      TabOrder = 0
+    end
+    object Edt_Nome: TEdit
+      Left = 72
+      Top = 51
+      Width = 121
+      Height = 21
+      TabOrder = 1
+    end
+    object CbbEstados: TComboBox
+      Left = 72
+      Top = 79
+      Width = 121
+      Height = 21
+      ItemIndex = 0
+      TabOrder = 2
+      Text = 'SC'
+      Items.Strings = (
+        'SC'
+        'PR'
+        'RS'
+        'SP'
+        'RJ'
+        'AM')
+    end
+  end
+  object Panel2: TPanel
+    Left = 407
+    Top = 0
+    Width = 144
+    Height = 123
+    Align = alRight
+    BevelOuter = bvNone
+    TabOrder = 1
+    ExplicitLeft = 438
+    ExplicitTop = -9
+    ExplicitHeight = 197
+    object btnConfirmar: TButton
+      Left = 56
+      Top = 22
+      Width = 75
+      Height = 25
+      Caption = 'Confirmar'
+      TabOrder = 0
+      OnClick = btnConfirmarClick
+    end
+    object btnCancelar: TButton
+      Left = 56
+      Top = 59
+      Width = 75
+      Height = 25
+      Caption = 'Cancelar'
+      TabOrder = 1
+    end
+  end
+end

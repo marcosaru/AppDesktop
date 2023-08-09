@@ -1,0 +1,56 @@
+unit uFiltroVenda;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Mask,
+  CurrEdit;
+
+type
+  TFrmFiltro = class(TForm)
+    pnlOpcoes: TPanel;
+    pnlBotoes: TPanel;
+    btnConfirmar: TButton;
+    btnCancelar: TButton;
+    MaskEdit1: TMaskEdit;
+    Edit3: TEdit;
+    Edit4: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
+    CheckBox3: TCheckBox;
+    MaskEdit2: TMaskEdit;
+    Label3: TLabel;
+    Edt_Valor: TCurrencyEdit;
+    CurrencyEdit1: TCurrencyEdit;
+    procedure btnCancelarClick(Sender: TObject);
+    procedure Edt_ValorInicialEnter(Sender: TObject);
+    procedure Edt_ValorInicialExit(Sender: TObject);
+    procedure Edt_ValorEnter(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmFiltro: TFrmFiltro;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmFiltro.btnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmFiltro.Edt_ValorEnter(Sender: TObject);
+begin
+  Edt_Valor.Text := '';
+end;
+
+
+end.

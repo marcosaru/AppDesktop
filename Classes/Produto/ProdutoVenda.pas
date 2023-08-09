@@ -1,0 +1,31 @@
+unit ProdutoVenda;
+
+interface
+uses ProdutoDTO;
+  type
+    TProdutoVenda = class
+      private
+        Fqtde : Double;
+        Fvalor: Double;
+        FProduto : TProdutoDTO;
+      public
+        property Quantidade: Double read Fqtde write Fqtde;
+        property Preco: Double read Fvalor write Fvalor;
+        property Produto : TProdutoDTO read FProduto write FProduto;
+        function Clone(Produto:TProdutoVenda):TProdutoVenda;
+    end;
+implementation
+
+{ TProdutoVenda }
+
+function TProdutoVenda.Clone(Produto: TProdutoVenda): TProdutoVenda;
+var
+  ProdutoVenda : TProdutoVenda;
+begin
+  Result := TProdutoVenda.Create;
+  Result.Produto := Self.Produto;
+  Result.Quantidade := Self.Quantidade;
+  Result.Preco := Self.Preco;
+end;
+
+end.

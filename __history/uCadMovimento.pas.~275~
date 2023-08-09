@@ -1,0 +1,832 @@
+﻿unit uCadMovimento;
+
+interface
+
+uses
+  Winapi.Windows,FormaPagtoDTO,FormaPagtoDAO, Winapi.Messages, System.SysUtils,
+  System.Variants, System.Classes, Vcl.Graphics,MovimentoDTO,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Data.DB, Vcl.Grids,
+  Vcl.DBGrids, Vcl.StdCtrls, Vcl.Imaging.pngimage, Vcl.Buttons,
+  ProdutoDTO,ProdutoDAO,CondicoesDTO,CondicoesDAO,
+  ClienteDTO,ClienteDAO, Vcl.Menus, Vcl.PlatformDefaultStyleActnCtrls,
+  Vcl.ActnPopup, uCurrencyEditVCL, Datasnap.DBClient, frxClass,
+  frxDBSet, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+
+type
+  TFrmCadMovimento = class(TForm)
+    pnlItens: TPanel;
+    Panel2: TPanel;
+    GridProdutos: TDBGrid;
+    pnlBotoes: TPanel;
+    Panel3: TPanel;
+    pnlInformacoes: TPanel;
+    btnIncluir: TButton;
+    btnRemover: TButton;
+    btnAlterar: TButton;
+    btnLimpar: TButton;
+    LblForm: TLabel;
+    Edt_CodigoCliente: TEdit;
+    Edt_Cliente: TEdit;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    Label10: TLabel;
+    btnConfirmar: TButton;
+    btnCancelar: TButton;
+    pnlProduto: TPanel;
+    Edt_Produto: TEdit;
+    Edt_CodigoProduto: TEdit;
+    Label11: TLabel;
+    Qtde: TLabel;
+    btnInserirProduto: TSpeedButton;
+    TblProdutos: TClientDataSet;
+    DTS: TDataSource;
+    btnOcultarPainel: TSpeedButton;
+    Label12: TLabel;
+    btnProcurarProduto: TButton;
+    TblProdutosCodigo: TIntegerField;
+    TblProdutosNome: TStringField;
+    TblProdutosQtd: TFloatField;
+    TblProdutosValor: TFloatField;
+    TblProdutosTotal: TFloatField;
+    Label13: TLabel;
+    Label1: TLabel;
+    Edt_Codigo: TEdit;
+    btnConsultarVendas: TButton;
+    btnImportar: TButton;
+    btnProcurarCliente: TButton;
+    Edt_TotalProdutos: TCurrencyEdit;
+    Edt_TotalServicos: TCurrencyEdit;
+    Edt_Acrescimo: TCurrencyEdit;
+    Edt_Desconto: TCurrencyEdit;
+    Edt_Frete: TCurrencyEdit;
+    Edt_QtdeItens: TCurrencyEdit;
+    Edt_TotalAPagar: TCurrencyEdit;
+    Edt_PorcentagemAcrescimo: TCurrencyEdit;
+    Edt_PorcentagemDesconto: TCurrencyEdit;
+    Edt_Valor: TCurrencyEdit;
+    Edt_Qtdade: TEdit;
+    QryItens: TFDQuery;
+    QryItensMITENS_MOVIMENTO: TIntegerField;
+    QryItensMITENS_PRODUTO: TIntegerField;
+    QryItensPRO_NOME: TStringField;
+    QryItensPRO_VALORVENDA: TIntegerField;
+    QryVenda: TFDQuery;
+    QryVendaMOV_CODIGO: TIntegerField;
+    QryVendaCLI_NOME: TStringField;
+    QryVendaMOV_DATA: TSQLTimeStampField;
+    QryVendaMOV_TIPO: TIntegerField;
+    QryVendaMOV_TOTALPRODUTOS: TFloatField;
+    QryVendaMOV_TOTALSERVICOS: TFloatField;
+    QryVendaMOV_ACRESCIMO: TFloatField;
+    QryVendaMOV_DESCONTO: TFloatField;
+    QryVendaMOV_FRETE: TFloatField;
+    QryVendaMOV_QTDEITENS: TSingleField;
+    QryVendaMOV_VALORFINAL: TFloatField;
+    QryItensMITENS_QUANTIDADE: TSingleField;
+    QryEmpresa: TFDQuery;
+    QryEmpresaEMP_NOME: TStringField;
+    QryEmpresaEMP_CODIGO: TIntegerField;
+    QryEmpresaEMP_CNPJ: TStringField;
+    QryEmpresaEMP_BAIRRO: TIntegerField;
+    QryEmpresaEMP_MUNICIPIO: TIntegerField;
+    QryEmpresaEMP_ENDERECO: TStringField;
+    QryEmpresaEMP_INSCRICAO: TIntegerField;
+    QryEmpresaEMP_FANTASIA: TStringField;
+    QryEmpresaEMP_FUNDACAO: TDateField;
+    QryEmpresaEMP_LOGO: TBlobField;
+    QryEmpresaBAI_NOME: TStringField;
+    QryEmpresaMUN_NOME: TStringField;
+    QryVendaBAI_NOME: TStringField;
+    QryVendaMUN_NOME: TStringField;
+    QryVendaCLI_ENDERECO: TStringField;
+    QryVendaCTO_VALOR: TStringField;
+    RelDtsVenda: TfrxDBDataset;
+    RelDtsItens: TfrxDBDataset;
+    RelDtsEmpresa: TfrxDBDataset;
+    RelVenda: TfrxReport;
+    Edt_Empresa: TEdit;
+    Edt_CodigoEmpresa: TEdit;
+    Label15: TLabel;
+    Edt_ObservacoesVenda: TLabel;
+    Edt_Observacoes: TMemo;
+    Label14: TLabel;
+    Edt_Telefone: TEdit;
+    QryVendaMOV_OBSERVACOES: TBlobField;
+    Edt_FormaDePagamento: TEdit;
+    Edt_CodigoFormaDePagamento: TEdit;
+    Label16: TLabel;
+    Edt_CondicaoPagamento: TEdit;
+    Edt_CodigoCondicaoPagamento: TEdit;
+    Label17: TLabel;
+    btnProcurarCondicao: TButton;
+    btnProcurarForma: TButton;
+    procedure btnIncluirClick(Sender: TObject);
+    procedure btnOcultarPainelClick(Sender: TObject);
+    procedure btnInserirProdutoClick(Sender: TObject);
+    procedure btnProcurarProdutoClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure Edt_AcrescimoKeyPress(Sender: TObject; var Key: Char);
+    procedure Edt_DescontoKeyPress(Sender: TObject; var Key: Char);
+    procedure pnlProdutoExit(Sender: TObject);
+    procedure btnRemoverClick(Sender: TObject);
+    procedure pnlBotoesClick(Sender: TObject);
+    procedure Panel3Click(Sender: TObject);
+    procedure Panel2Click(Sender: TObject);
+    procedure pnlInformacoesClick(Sender: TObject);
+    procedure btnConfirmarClick(Sender: TObject);
+    procedure btnCancelarClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure btnConsultarVendasClick(Sender: TObject);
+    procedure Edt_CodigoClienteKeyPress(Sender: TObject; var Key: Char);
+    procedure btnProcurarClienteClick(Sender: TObject);
+    procedure Edt_FreteKeyPress(Sender: TObject; var Key: Char);
+    procedure Edt_QtdadeKeyPress(Sender: TObject; var Key: Char);
+    procedure Edt_CodigoProdutoKeyPress(Sender: TObject; var Key: Char);
+    procedure Edt_PorcentagemDescontoKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure Edt_PorcentagemAcrescimoKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure btnProcurarFormaClick(Sender: TObject);
+    procedure btnProcurarCondicaoClick(Sender: TObject);
+  private
+    { Private declarations }
+    FStatus:integer;
+    Produto : TProdutoDTO;
+    ProdutoDAO: TProdutoDAO;
+    Condicao : TCondicoesDTO;
+    CondicaoDAO:TCondicoesDAO;
+    FormaPagto: TFormaPagtoDTO;
+    FormaPagtoDAO: TFormaPagtoDAO;
+    Cliente   : TClienteDTO;
+    ClienteDAO: TClienteDAO;
+    QryConfig : TFDQuery;
+
+    procedure controlaStatus;
+    procedure AtualizarValores;
+    procedure confirma;
+    procedure carregarEmpresa(ACodigo:String);
+    procedure carregarVenda(ACodigo:String);
+    procedure carregarItens(ACodigo:String);
+    Procedure CriarParcelas(Movimento: TMovimentoDTO; Condicao: TCondicoesDTO);
+  public
+    { Public declarations }
+    constructor create(AOwner:TComponent;AStatus:Integer);
+  end;
+
+var
+  FrmCadMovimento: TFrmCadMovimento;
+
+implementation
+
+{$R *.dfm}
+
+uses uPesProduto,MovimentoDAO, uPesVenda, dmConexao, uPesCliente,ProdutoVenda,
+  uPesFormPagto, uPesCondicoes, PagamentosMovimentoDTO, DateUtils;
+
+procedure TFrmCadMovimento.AtualizarValores;
+var
+  TotalApagar: Real;
+
+  procedure AtualizarPorcentagemAcrescimo;
+  begin
+    if Edt_PorcentagemAcrescimo.value > 0 then
+    begin
+      Edt_Acrescimo.Value := Edt_TotalProdutos.value * (Edt_PorcentagemAcrescimo.Value / 100);
+      Edt_Acrescimo.Enabled := false;
+    end
+    else if Edt_Acrescimo.Value > 0 then
+    begin
+      Edt_PorcentagemAcrescimo.Value := (Edt_Acrescimo.Value * 100) / Edt_TotalProdutos.value;
+      Edt_PorcentagemAcrescimo.Enabled := false;
+    end;
+  end;
+
+  procedure AtualizarPorcentagemDesconto;
+  begin
+    if Edt_PorcentagemDesconto.value > 0 then
+    begin
+      Edt_Desconto.Value := Edt_TotalProdutos.value * (Edt_PorcentagemDesconto.Value / 100);
+      Edt_Desconto.Enabled := false;
+    end
+    else if Edt_Desconto.Value > 0 then
+    begin
+      Edt_PorcentagemDesconto.Value := (Edt_Desconto.Value * 100) / Edt_TotalProdutos.value;
+      Edt_PorcentagemDesconto.Enabled := false;
+    end;
+  end;
+
+  procedure CalcularTotal;
+  begin
+    Edt_TotalAPagar.Value := TotalApagar + Edt_Acrescimo.Value - Edt_Desconto.Value + Edt_Frete.Value;
+  end;
+
+begin
+  TblProdutos.First;
+  Edt_TotalProdutos.value := 0;
+  Edt_QtdeItens.Value     := 0;
+
+  while not TblProdutos.EoF do
+  begin
+    Edt_TotalProdutos.value := Edt_TotalProdutos.value + (TblProdutosValor.AsFloat * TblProdutosQtd.AsFloat);
+    Edt_QtdeItens.Value := Edt_QtdeItens.Value + TblProdutosQtd.AsFloat;
+    TblProdutos.Next;
+  end;
+
+  TotalApagar := Edt_TotalProdutos.value;
+
+  AtualizarPorcentagemAcrescimo;
+  AtualizarPorcentagemDesconto;
+  CalcularTotal;
+end;
+
+procedure TFrmCadMovimento.btnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmCadMovimento.btnConfirmarClick(Sender: TObject);
+begin
+  if Trim(Edt_Cliente.Text) = '' then
+  begin
+    ShowMessage('Por favor, preencha o campo Cliente.');
+    Edt_Cliente.SetFocus;
+    Exit;
+  end;
+
+  if Trim(Edt_Codigo.Text) = '' then
+  begin
+    ShowMessage('Por favor, preencha o campo Código.');
+    Edt_Codigo.SetFocus;
+    Exit;
+  end;
+
+  if Trim(Edt_Empresa.Text) = '' then
+  begin
+    ShowMessage('Por favor, preencha o campo Empresa.');
+    Edt_Empresa.SetFocus;
+    Exit;
+  end;
+
+  if Trim(Edt_CodigoEmpresa.Text) = '' then
+  begin
+    ShowMessage('Por favor, preencha o campo Código da Empresa.');
+    Edt_CodigoEmpresa.SetFocus;
+    Exit;
+  end;
+
+  if Trim(Edt_FormaDePagamento.Text) = '' then
+  begin
+    ShowMessage('Por favor, preencha o campo Forma de Pagamento.');
+    Edt_FormaDePagamento.SetFocus;
+    Exit;
+  end;
+
+  if Trim(Edt_CodigoFormaDePagamento.Text) = '' then
+  begin
+    ShowMessage('Por favor, preencha o campo Código da Forma de Pagamento.');
+    Edt_CodigoFormaDePagamento.SetFocus;
+    Exit;
+  end;
+
+  if Trim(Edt_CondicaoPagamento.Text) = '' then
+  begin
+    ShowMessage('Por favor, preencha o campo Condição de Pagamento.');
+    Edt_CondicaoPagamento.SetFocus;
+    Exit;
+  end;
+
+  if Trim(Edt_CodigoCondicaoPagamento.Text) = '' then
+  begin
+    ShowMessage('Por favor, preencha o campo Código da Condição de Pagamento.');
+    Edt_CodigoCondicaoPagamento.SetFocus;
+    Exit;
+  end;
+
+  confirma;
+end;
+
+procedure TFrmCadMovimento.btnConsultarVendasClick(Sender: TObject);
+begin
+  try
+    FrmPesVenda := TFrmPesVenda.Create(Self);
+    FrmPesVenda.ShowModal;
+  finally
+    FrmPesVenda.Free;
+  end;
+end;
+
+procedure TFrmCadMovimento.btnIncluirClick(Sender: TObject);
+begin
+  pnlProduto.Visible := true;
+  Edt_CodigoProduto.SetFocus;
+end;
+
+procedure TFrmCadMovimento.btnProcurarClienteClick(Sender: TObject);
+begin
+  try
+    FrmPesCliente := TFrmPesCliente.Create(Self);
+    FrmPesCliente.ShowModal;
+  finally
+    if FrmPesCliente.ModalResult = mrOk then
+      Edt_Cliente.Text := FrmPesCliente.QryPesquisaCLI_NOME.AsString;
+
+    FrmPesCliente.Free;
+  end;
+end;
+
+procedure TFrmCadMovimento.btnProcurarCondicaoClick(Sender: TObject);
+begin
+  try
+    FrmPesCondicoes := TFrmPesCondicoes.Create(Self);
+    FrmPesCondicoes.ShowModal;
+  finally
+    if FrmPesCondicoes.ModalResult = MrOk then
+    begin
+      Edt_CondicaoPagamento.Text := FrmPesCondicoes.QryPesquisaCON_DESCRICAO.AsString;
+      Edt_CodigoCondicaoPagamento.Text := FrmPesCondicoes.QryPesquisaCON_CODIGO.AsString;
+    end;
+    FrmPesCondicoes.Free;
+  end;
+end;
+
+procedure TFrmCadMovimento.btnProcurarFormaClick(Sender: TObject);
+begin
+  try
+    FrmPesFormaPagamento := TFrmPesFormaPagamento.Create(Self);
+    FrmPesFormaPagamento.ShowModal;
+  finally
+    if FrmPesFormaPagamento.ModalResult = mrOk then
+    begin
+      FormaPagto := TFormaPagtoDTO.Create;
+      FormaPagtoDAO:=  TFormaPagtoDAO.create;
+
+      FormaPagto := FormaPagtoDAO.Encontrar(FrmPesFormaPagamento.QryPesquisaFORPAGTO_CODIGO.AsString);
+      Edt_FormaDePagamento.Text := FormaPagto.Descricao;
+      Edt_CodigoFormaDePagamento.Text := FormaPagto.Codigo;
+
+      FormaPagto.Free;
+      FormaPagtoDAO.Free;
+    end;
+    FrmPesFormaPagamento.Free;
+  end;
+end;
+
+procedure TFrmCadMovimento.btnProcurarProdutoClick(Sender: TObject);
+begin
+  try
+    FrmPesProduto := TFrmPesProduto.Create(self);
+    FrmPesProduto.ShowModal;
+  finally
+    if FrmPesProduto.ModalResult = mrOk then
+    begin
+      Edt_CodigoProduto.Text := FrmPesProduto.QryPesquisaPRO_CODIGO.AsString;
+      Edt_Produto.Text       := FrmPesProduto.QryPesquisaPRO_NOME.AsString;
+      Edt_Valor.Value        := FrmPesProduto.QryPesquisaPRO_VALORVENDA.AsFloat;
+      Edt_Qtdade.text        := '';
+      Edt_Qtdade.SetFocus;
+    end;
+    FrmPesProduto.Free;
+  end;
+end;
+
+procedure TFrmCadMovimento.btnRemoverClick(Sender: TObject);
+begin
+  if MessageDlg('Deseja excluir o item: '+TblProdutosNome.AsString,mtConfirmation,[mbYes,mbNo],0) = mrYes then
+  begin
+    TblProdutos.Edit;
+    TblProdutos.Delete;
+    Edt_PorcentagemAcrescimo.Enabled := true;
+    Edt_Acrescimo.Enabled := true;
+    Edt_PorcentagemDesconto.Enabled := true;
+    Edt_Desconto.Enabled := true;
+  end;
+  controlaStatus;
+  AtualizarValores;
+end;
+
+
+procedure TFrmCadMovimento.carregarEmpresa(ACodigo:String);
+begin
+  QryEmpresa.Connection:= fdmConexao.BANCO;
+  QryEmpresa.SQL.Clear;
+  QryEmpresa.SQL.Add('select e.*,b.bai_nome,m.mun_nome from empresa as e '+
+                           'join municipio m on e.emp_municipio = m.mun_codigo '+
+                           'join bairro b on b.bai_codigo = e.emp_bairro');
+
+  QryEmpresa.Open;
+end;
+
+procedure TFrmCadMovimento.carregarItens(ACodigo:String);
+begin
+  QryItens.SQL.Clear;
+  QryItens.Connection := fdmConexao.BANCO;
+  QryItens.SQL.Add('select mitens_movimento,mitens_produto, '+
+                         'pro_nome,pro_valorvenda,mitens_quantidade                 '+
+                         'from movimentoitens                     '+
+                         'Join produto on pro_codigo = mitens_produto ' +
+                         'where mitens_movimento = '+ACodigo);
+  QryItens.Open;
+end;
+
+procedure TFrmCadMovimento.CriarParcelas(Movimento: TMovimentoDTO;
+  Condicao: TCondicoesDTO);
+var
+  valorParcela: Real;
+  dias: TStringList;
+  parcela: TPagamentosMovimentoDTO;
+  i: Integer;
+
+begin
+  dias := TStringList.Create;
+  try
+    dias.Delimiter := '/';
+    dias.StrictDelimiter := True;
+    dias.DelimitedText := Condicao.Descricao;
+
+    valorParcela := Movimento.ValorTotal / dias.Count;
+
+    for i := 0 to dias.Count - 1 do
+    begin
+      parcela := TPagamentosMovimentoDTO.Create;
+      try
+        parcela.Codigo := i + 1;
+        parcela.DataVcto := IncDay(Movimento.Data, StrToInt(dias[i]));
+        parcela.NumeroDaParcela := i + 1;
+        parcela.Juros := 0;
+        parcela.Multa := 0;
+        parcela.Observacoes := '';
+
+        Movimento.Pagamentos.Add(parcela);
+      except
+        parcela.Free;
+        raise;
+      end;
+    end;
+  finally
+    dias.Free;
+  end;
+end;
+
+procedure TFrmCadMovimento.carregarVenda(ACodigo:String);
+begin
+  QryVenda.Connection := fdmConexao.BANCO;
+  QryVenda.SQL.Clear;
+  QryVenda.SQL.Add('select mov_codigo,cli_nome,mov_data,mov_tipo,mov_totalProdutos, '+
+                   'bai_nome,mun_nome,Cli_endereco, '+
+                   'mov_totalservicos,cto_valor,mov_acrescimo,mov_desconto,          '+
+                   'mov_frete,mov_qtdeitens,mov_valorfinal,mov_observacoes from movimento '+
+                   'join cliente on cli_codigo = mov_cliente '+
+                   'join bairro on bai_codigo = cli_bairro   '+
+                   'join municipio on mun_codigo = cli_municipio '+
+                   'join contato on cto_cliente = cli_codigo where cto_tipo = 1 and mov_codigo = '+ACodigo);
+
+  QryVenda.Open;
+end;
+
+procedure TFrmCadMovimento.confirma;
+var
+  Movimento : TMovimentoDTO;
+  MovimentoDAO: TMovimentoDAO;
+
+  procedure AdicionarProdutosNaVenda;
+  var i:integer;
+  ProdutoVenda :TProdutoVenda;
+  begin
+    TblProdutos.First;
+
+    ProdutoDAO := TProdutoDAO.create(1);
+
+    while not TblProdutos.EoF do
+    begin
+      ProdutoVenda := TProdutoVenda.Create;
+      Produto := ProdutoDAO.EncontrarProduto(TblProdutosCodigo.AsString);
+      Produto.ValorVenda := TblProdutosValor.AsFloat;
+
+      ProdutoVenda.Produto := Produto.Clone(Produto);
+      ProdutoVenda.Quantidade := TblProdutosQtd.AsFloat;
+
+      Movimento.Produtos.Add(ProdutoVenda.Clone(ProdutoVenda));
+      TblProdutos.Next;
+    end;
+  end;
+
+begin
+  try
+    Movimento := TMovimentoDTO.Create;
+    MovimentoDAO := TMovimentoDAO.Create;
+    Cliente := TClienteDTO.Create;
+    ClienteDAO := TClienteDAO.Create;
+
+    CondicaoDAO := TCondicoesDAO.create;
+    Condicao := CondicaoDAO.Encontrar(Edt_CodigoCondicaoPagamento.Text);
+
+    FormaPagtoDAO := TFormaPagtoDAO.create;
+    FormaPagto := FormaPagtoDAO.Encontrar(Edt_CodigoFormaDePagamento.Text);
+
+    Movimento.Codigo := Edt_Codigo.Text;
+    Movimento.Cliente := ClienteDAO.encontrarCliente(Edt_CodigoCliente.Text);
+    Movimento.Data    := Date;
+    Movimento.Tipo    := FStatus.ToString;
+    Movimento.TotalProdutos := Edt_TotalProdutos.value;
+    Movimento.TotalServicos := Edt_TotalServicos.Value;
+    Movimento.Acrescimo     := Edt_Acrescimo.Value;
+    Movimento.Desconto      := Edt_Desconto.Value;
+    Movimento.QtdadeItens   := Edt_QtdeItens.value;
+    Movimento.ValorTotal    := Edt_TotalAPagar.Value;
+    Movimento.Observacoes   := Edt_Observacoes.Text;
+    Movimento.CondicaoPagto := Condicao;
+    Movimento.FormaPagto    := FormaPagto;
+
+    AdicionarProdutosNaVenda;
+
+    if Condicao.Descricao.Contains('/') then
+      CriarParcelas(Movimento, Condicao);
+
+    MovimentoDAO.salvar(Movimento);
+
+    if MessageDlg('Deseja imprimir?',mtConfirmation,[mbYes,mbNo],0) = mrYes then
+    begin
+
+      try
+        RelDtsVenda.Close;
+        RelDtsItens.Close;
+        RelDtsEmpresa.Close;
+
+        carregarEmpresa(movimento.Codigo);
+        carregarVenda(movimento.Codigo);
+        carregarItens(movimento.Codigo);
+
+        RelDtsVenda.Open;
+        RelDtsItens.Open;
+        RelDtsEmpresa.Open;
+
+        RelVenda.ShowReport();
+      Finally
+
+        RelDtsVenda.Free;
+        RelVenda.Free;
+      end;
+
+    end;
+  finally
+    Cliente.Free;
+    ClienteDAO.Free;
+    CondicaoDAO.Free;
+    FormaPagtoDAO.Free;
+    Movimento.Free;
+    MovimentoDAO.Free;
+  end;
+
+
+end;
+
+procedure TFrmCadMovimento.controlaStatus;
+begin
+  btnRemover.Enabled   := TblProdutos.RecordCount >0;
+  btnAlterar.Enabled   := TblProdutos.RecordCount >0;
+  btnLimpar.Enabled    := TblProdutos.RecordCount >0;
+  btnConfirmar.Enabled := TblProdutos.RecordCount >0;
+end;
+
+constructor TFrmCadMovimento.create(AOwner: TComponent; AStatus: Integer);
+begin
+  inherited create(AOwner);
+  TblProdutos.CreateDataSet;
+  FStatus:=AStatus;
+end;
+
+
+
+procedure TFrmCadMovimento.Edt_AcrescimoKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if (key = #13) then
+  begin
+    AtualizarValores;
+  end;
+  if (key = #13) and (Edt_Acrescimo.Value <= 0) then
+  begin
+    Edt_PorcentagemAcrescimo.value := 0;
+    Edt_PorcentagemAcrescimo.Enabled := true;
+  end;
+end;
+
+procedure TFrmCadMovimento.Edt_CodigoClienteKeyPress(Sender: TObject;
+  var Key: Char);
+var
+  Cliente : TClienteDTO;
+  ClienteDAO : TClienteDAO;
+  QryBuscarTel : TFDQuery;
+  procedure CarregarTelefone(ACodigo:String);
+  begin
+    try
+      QryBuscarTel := TFDQuery.Create(nil);
+      QryBuscarTel.Connection := fdmConexao.BANCO;
+      QryBuscarTel.SQL.Clear;
+      QryBuscarTel.SQL.Add('select cto_cliente,cto_tipo,cto_valor from contato '+
+                           'where cto_tipo = 1 and cto_cliente = '+ACodigo);
+      QryBuscarTel.Open;
+      if QryBuscarTel.RecordCount > 0 then
+        Edt_Telefone.Text := QryBuscarTel.FieldByName('cto_valor').AsString;
+    finally
+      QryBuscarTel.Free;
+    end;
+
+  end;
+begin
+  if key = #13 then
+  begin
+    Edt_Cliente.Text  := '';
+    Edt_Telefone.Text := '';
+
+    try
+      Cliente := TClienteDTO.create;
+      ClienteDAO := TClienteDAO.create;
+
+      Cliente := ClienteDAO.encontrarCliente(Edt_CodigoCliente.Text);
+      if Assigned(Cliente) then
+      begin
+        Edt_Cliente.Text := Cliente.Nome;
+        CarregarTelefone(Cliente.Codigo);
+      end
+      else
+        ShowMessage('Cliente Não encontrado. Insira outro código ou utilize a busca.');
+    finally
+      Cliente.Free;
+      ClienteDAO.Free;
+    end;
+  end;
+end;
+
+procedure TFrmCadMovimento.Edt_CodigoProdutoKeyPress(Sender: TObject;
+  var Key: Char);
+var
+  Produto: TProdutoDTO;
+  ProdutoDAO: TProdutoDAO;
+begin
+
+  if (Key = #13) and (Trim(Edt_CodigoProduto.Text) <> '') then
+  begin
+    try
+      ProdutoDAO := TProdutoDAO.Create(1);
+      Produto := ProdutoDAO.EncontrarProduto(Edt_CodigoProduto.Text);
+      if Assigned(Produto) then
+      begin
+        Edt_Produto.Text := Produto.Nome;
+        Edt_Valor.Value  := Produto.ValorVenda;
+      end
+      else
+        ShowMessage('Produto n�o encontrado. Por favor, digite outro c�digo.');
+      Edt_Qtdade.SetFocus;
+    finally
+      ProdutoDAO.Free;
+    end;
+  end;
+end;
+
+procedure TFrmCadMovimento.Edt_DescontoKeyPress(Sender: TObject; var Key: Char);
+begin
+   if (key = #13) then
+  begin
+    AtualizarValores;
+  end;
+  if (key = #13) and (Edt_Desconto.Value <= 0) then
+  begin
+    Edt_PorcentagemDesconto.value := 0;
+    Edt_PorcentagemDesconto.Enabled := true;
+  end;
+
+end;
+
+procedure TFrmCadMovimento.Edt_FreteKeyPress(Sender: TObject; var Key: Char);
+begin
+ if key = #13 then
+  AtualizarValores;
+end;
+
+procedure TFrmCadMovimento.Edt_PorcentagemAcrescimoKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+begin
+  if (key = VK_RETURN) then
+    AtualizarValores;
+
+  if (key = VK_RETURN) and (Edt_PorcentagemAcrescimo.Value <= 0) then
+  begin
+    Edt_Acrescimo.value := 0;
+    Edt_Acrescimo.Enabled := true;
+  end;
+end;
+
+procedure TFrmCadMovimento.Edt_PorcentagemDescontoKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_RETURN then
+    AtualizarValores;
+  if (Key = VK_RETURN) and (Edt_PorcentagemDesconto.Value <= 0) then
+  begin
+    Edt_Desconto.value := 0;
+    Edt_Desconto.Enabled := true;
+  end;
+end;
+
+procedure TFrmCadMovimento.Edt_QtdadeKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+  begin
+    btnInserirProdutoClick(Self);
+    Edt_Produto.Text := '';
+    Edt_CodigoProduto.Text := '';
+    Edt_Valor.Value    := 000;
+    Edt_Qtdade.Text   := '';
+    Edt_CodigoProduto.SetFocus;
+  end;
+end;
+
+procedure TFrmCadMovimento.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #27 then
+    btnCancelarClick(nil);
+end;
+
+procedure TFrmCadMovimento.FormShow(Sender: TObject);
+begin
+
+  if FStatus = 1 then
+    LblForm.Caption := 'Venda'
+  else
+  if FStatus = 2 then
+    LblForm.Caption := 'Pré-Venda'
+  else
+  if FStatus = 3 then
+    LblForm.Caption := 'Orçamento';
+
+  Edt_Codigo.Text := fdmConexao.retornaCodigoMaximo('Mov_codigo','MOVIMENTO');
+  carregarEmpresa('1');
+  Edt_CodigoEmpresa.Text := QryEmpresa.FieldByName('Emp_Codigo').AsString;
+  Edt_Empresa.Text := QryEmpresa.FieldByName('Emp_nome').AsString;
+
+  controlaStatus;
+end;
+
+procedure TFrmCadMovimento.Panel2Click(Sender: TObject);
+begin
+  pnlProduto.Visible := false;
+end;
+
+procedure TFrmCadMovimento.Panel3Click(Sender: TObject);
+begin
+  pnlProduto.Visible := false;
+end;
+
+procedure TFrmCadMovimento.pnlBotoesClick(Sender: TObject);
+begin
+  pnlProduto.Visible := false;
+end;
+
+procedure TFrmCadMovimento.pnlInformacoesClick(Sender: TObject);
+begin
+  pnlProduto.Visible := false;
+end;
+
+procedure TFrmCadMovimento.pnlProdutoExit(Sender: TObject);
+begin
+  pnlProduto.Visible := false;
+end;
+
+
+procedure TFrmCadMovimento.btnInserirProdutoClick(Sender: TObject);
+begin
+  if Trim(Edt_Produto.Text) = '' then
+    exit;
+  if Edt_valor.Value <= 0 then
+    exit;
+  if StrToInt(Edt_Qtdade.Text) <=0 then
+    exit;
+
+  TblProdutos.Append;
+  TblProdutosCodigo.AsString := Edt_CodigoProduto.Text;
+  TblProdutosNome.AsString   := Edt_Produto.Text;
+  TblProdutosQtd.AsFloat     := StrToFloat(Edt_Qtdade.Text);
+  TblProdutosValor.AsFloat   := Edt_Valor.Value;
+  TblProdutosTotal.AsFloat   := TblProdutosValor.AsFloat * TblProdutosQtd.AsFloat;
+
+  TblProdutos.Post;
+
+  AtualizarValores;
+  controlaStatus;
+end;
+
+procedure TFrmCadMovimento.btnOcultarPainelClick(Sender: TObject);
+begin
+  pnlProduto.Visible := false;
+end;
+
+end.

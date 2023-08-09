@@ -1,0 +1,158 @@
+unit uCadFornecedor;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,MunicipioDTO,
+  FornecedorDTO,FornecedorDAO,MunicipioDAO;
+
+type
+  TFrmCadFornecedor = class(TForm)
+    pnlCadastro: TPanel;
+    Panel2: TPanel;
+    Edt_Codigo: TEdit;
+    Edt_Nome: TEdit;
+    btnConfirmar: TButton;
+    btnCancelar: TButton;
+    Código: TLabel;
+    Nome: TLabel;
+    Municipio: TLabel;
+    Edt_CodigoMunicipio: TEdit;
+    Edt_Municipio: TEdit;
+    btnProcurarMunicipio: TButton;
+    procedure btnProcurarMunicipioClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnConfirmarClick(Sender: TObject);
+    procedure confirma;
+  private
+    { Private declarations }
+    FStatus:integer;
+    MunicipioDTO  : TMunicipioDTO;
+    MunicipioDAO : TMunicipioDAO;
+    FornecedorDTO : TFornecedorDTO;
+    FornecedorDAO : TFornecedorDAO;
+    procedure controlarStatus;
+    procedure limpar;
+    procedure carregar(ACodigo:String);
+
+  public
+    { Public declarations }
+    Constructor create(AOwner:TComponent;ACodigo:Integer);overload;
+    Destructor destroy;
+
+  end;
+
+var
+  FrmCadFornecedor: TFrmCadFornecedor;
+
+implementation
+
+{$R *.dfm}
+
+uses uPesMunicipio, dmConexao, uPesFornecedores;
+
+procedure TFrmCadFornecedor.btnConfirmarClick(Sender: TObject);
+begin
+  confirma;
+end;
+
+procedure TFrmCadFornecedor.btnProcurarMunicipioClick(Sender: TObject);
+begin
+  try
+    FrmPesMunicipio := TFrmPesMunicipio.Create(Self);
+    FrmPesMunicipio.ShowModal;
+  finally
+    if FrmPesMunicipio.ModalResult = mrOk then
+    begin
+      Edt_CodigoMunicipio.Text := FrmPesMunicipio.QryPesquisaMUN_CODIGO.AsString;
+      Edt_Municipio.Text       := FrmPesMunicipio.QryPesquisaMUN_NOME.AsString;
+    end;
+    FrmPesMunicipio.Free;
+  end;
+end;
+
+procedure TFrmCadFornecedor.carregar(ACodigo:String);
+begin
+  FornecedorDTO := FornecedorDAO.EncontrarFornecedor(ACodigo);
+  if Assigned(FornecedorDTO) then
+  begin
+    Edt_Codigo.Text          := FornecedorDTO.Codigo;
+    Edt_Nome.Text            := FornecedorDTO.Nome;
+    Edt_Municipio.Text       := FornecedorDTO.Municipio.Nome;
+    Edt_CodigoMunicipio.Text := FornecedorDTO.Municipio.Codigo;
+  end;
+end;
+
+procedure TFrmCadFornecedor.confirma;
+begin
+  FornecedorDTO.Codigo           :=  Edt_Codigo.Text;
+  FornecedorDTO.Nome             :=  Edt_Nome.Text;
+  FornecedorDTO.Municipio        :=  MunicipioDAO.Encontrar(Edt_CodigoMunicipio.Text);
+
+  if Fstatus in [0,1] then
+    FornecedorDAO.salvar(FornecedorDTO)
+  else
+  if FStatus = 2 then
+    FornecedorDAO.Alterar(FornecedorDTO);
+  if MessageDlg('Deseja Incluir mais um registro?',mtConfirmation,[mbYes,mbNo],0) = mrYes then
+  begin
+    limpar;
+    Edt_Codigo.Text := fdmConexao.retornaCodigoMaximo('FOR_CODIGO','FORNECEDOR');
+  end
+  else
+    ModalResult := mrOk;
+end;
+
+procedure TFrmCadFornecedor.controlarStatus;
+begin
+  pnlCadastro.Enabled := Fstatus <> 3;
+  btnConfirmar.Enabled := Fstatus <> 3;15~;]
+  end;
+
+constructor TFrmCadFornecedor.create(AOwner: TComponent; ACodigo: Integer);
+begin
+  inherited create(AOwner);
+  FornecedorDTO := TFornecedorDTO.Create;
+  FornecedorDAO := TFornecedorDAO.Create;
+  MunicipioDAO  := TMunicipioDAO.Create;
+  FStatus       := ACodigo;
+end;
+
+destructor TFrmCadFornecedor.destroy;
+begin
+   FornecedorDTO.Free;
+   FornecedorDAO.Free;
+   inherited;
+end;
+
+procedure TFrmCadFornecedor.FormShow(Sender: TObject);
+begin
+  if Fstatus = 1 then
+  begin
+    limpar;
+    Edt_Codigo.Text := fdmConexao.retornaCodigoMaximo('FOR_CODIGO','FORNECEDOR');
+    Edt_Nome.SetFocus;
+  end
+  else
+  if FStatus = 2 then
+  begin
+    carregar(FrmPesFornecedores.QryPesquisaFOR_CODIGO.AsString);
+    Edt_Codigo.SetFocus;
+  end
+  else
+  if FStatus = 3 then
+    carregar(FrmPesFornecedores.QryPesquisaFOR_CODIGO.AsString);
+
+  controlarStatus;
+
+end;
+
+procedure TFrmCadFornecedor.limpar;
+begin
+  Edt_Nome.Text := '';
+  Edt_Municipio.Text := '';
+  Edt_CodigoMunicipio.Text := '';
+end;
+
+end.

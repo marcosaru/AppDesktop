@@ -1,0 +1,17 @@
+unit ProdutoVenda;
+
+interface
+uses ProdutoDTO;
+  type
+    TProdutoVenda = class
+      private
+        Fqtde : Double;
+        FProduto : TProdutoDTO;
+      public
+        property Quantidade: Double read Fqtde write Fqtde;
+        property Produto : TProdutoDTO read FProduto write FProduto;
+    end;
+
+implementation
+
+end.

@@ -1,0 +1,42 @@
+program Projeto;
+
+uses
+  Vcl.Forms,
+  Main in 'Main.pas' {Principal},
+  dmConexao in 'dmConexao.pas' {fdmConexao: TDataModule},
+  uPesCliente in 'uPesCliente.pas' {FrmPesCliente},
+  uPesBairro in 'uPesBairro.pas' {FrmPesBairro},
+  uPesMunicipio in 'uPesMunicipio.pas' {FrmPesMunicipio},
+  uCadCliente in 'uCadCliente.pas' {FrmCadCliente},
+  BairroDAO in 'Classes\Bairro\BairroDAO.pas',
+  BairroDTO in 'Classes\Bairro\BairroDTO.pas',
+  uCadBairro in 'uCadBairro.pas' {FrmCadBairro},
+  ClienteDAO in 'Classes\Cliente\ClienteDAO.pas',
+  ClienteDTO in 'Classes\Cliente\ClienteDTO.pas',
+  uCadMunicipio in 'uCadMunicipio.pas' {FrmCadMunicipio},
+  MunicipioDTO in 'Classes\Municipio\MunicipioDTO.pas',
+  MunicipioDAO in 'Classes\Municipio\MunicipioDAO.pas',
+  uPesFornecedores in 'uPesFornecedores.pas' {FrmPesFornecedor},
+  uCadFornecedor in 'uCadFornecedor.pas' {FrmCadFornecedor},
+  FornecedorDTO in 'Classes\Fornecedor\FornecedorDTO.pas',
+  FornecedorDAO in 'Classes\Fornecedor\FornecedorDAO.pas',
+  ProdutoDAO in 'Classes\Produto\ProdutoDAO.pas',
+  ProdutoDTO in 'Classes\Produto\ProdutoDTO.pas',
+  uPesProduto in 'uPesProduto.pas' {FrmPesProduto},
+  uCadProduto in 'uCadProduto.pas' {FrmCadProduto},
+  uPesVenda in 'uPesVenda.pas' {FrmPesVenda},
+  uCadMovimento in 'uCadMovimento.pas' {FrmCadMovimento},
+  MovimentoDTO in 'Classes\Movimento\MovimentoDTO.pas',
+  MovimentoDAO in 'Classes\Movimento\MovimentoDAO.pas',
+  uFiltroVenda in 'uFiltroVenda.pas' {FrmFiltro};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TPrincipal, Principal);
+  Application.CreateForm(TfdmConexao, fdmConexao);
+  Application.CreateForm(TFrmFiltro, FrmFiltro);
+  Application.Run;
+end.

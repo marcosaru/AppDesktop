@@ -1,0 +1,38 @@
+unit FormaPagtoDTO;
+
+interface
+  type
+    TFormaPagtoDTO = class
+      private
+        FCodigo: string;
+        FDescricao: String;
+        FRepresentaAV: Integer;
+      public
+        property Codigo : String read FCodigo write FCodigo;
+        property Descricao : String read FDescricao write FDescricao;
+        property Avista : Integer read FRepresentaAV write FRepresentaAV;
+        function Clone(FormaAClonar:TFormaPagtoDTO):TFormaPagtoDTO;
+        destructor destroy;override;
+    end;
+
+implementation
+
+{ TFormaPagtoDTO }
+
+function TFormaPagtoDTO.Clone(FormaAClonar: TFormaPagtoDTO): TFormaPagtoDTO;
+begin
+  Result := TFormaPagtoDTO.Create;
+  Result.Codigo := FormaAClonar.Codigo;
+  Result.Descricao := FormaAClonar.Descricao;
+  Result.Avista := FormaAClonar.Avista;
+end;
+
+destructor TFormaPagtoDTO.destroy;
+begin
+  if Assigned(TFormaPagtoDTO) then
+    FreeAndNil(TFormaPagtoDTO);
+
+  inherited;
+end;
+
+end.

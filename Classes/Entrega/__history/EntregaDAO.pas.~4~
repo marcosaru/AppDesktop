@@ -1,0 +1,63 @@
+unit EntregaDAO;
+
+interface
+  uses
+    EntregaDTO,MovimentoDTO,MovimentoDAO,ProdutoDTO,ProdutoVenda,sysUtils;
+  type
+    TEntregaDAO = class
+      private
+        FStatus : integer;
+        Entrega : TEntregaDTO;
+        Movimento : TMovimentoDTO;
+        MovimentoDAO : TMovimentoDAO;
+        Produto : TProdutoDTO;
+        ProdutoVenda: TProdutoVenda;
+      public
+        function encontrar(Acodigo:String):TEntregaDTO;
+        function Salvar(Entrega:TEntregaDTO):boolean;
+        function Alterar(Entrega:TEntregaDTO):boolean;
+        constructor create;
+        destructor destroy;
+
+    end;
+
+
+implementation
+
+{ TEntregaDAO }
+
+function TEntregaDAO.Alterar(Entrega: TEntregaDTO): boolean;
+begin
+
+end;
+
+constructor TEntregaDAO.create;
+begin
+  Entrega := TEntregaDTO.create;
+  Movimento := TMovimentoDTO.create;
+  MovimentoDAO := TMovimentoDAO.create;
+  Produto := TProdutoDTO.Create;
+  ProdutoVenda := TProdutoVenda.Create;
+end;
+
+destructor TEntregaDAO.destroy;
+begin
+  FreeAndNil(Entrega);
+  FreeAndNil(Movimento);
+  FreeAndNil(MovimentoDAO);
+  FreeAndNil(Produto);
+  FreeAndNil(ProdutoVenda);
+  inherited;
+end;
+
+function TEntregaDAO.encontrar(Acodigo: String): TEntregaDTO;
+begin
+
+end;
+
+function TEntregaDAO.Salvar(Entrega: TEntregaDTO): boolean;
+begin
+
+end;
+
+end.

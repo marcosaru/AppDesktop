@@ -1,0 +1,241 @@
+unit uPesVencimentos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client, uCurrencyEditVCL,System.DateUtils;
+
+type
+  TFrmPesVencimentos = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnReceber: TButton;
+    btnApresentar: TButton;
+    btnCancelar: TButton;
+    Grid: TDBGrid;
+    DtsVencimentos: TDataSource;
+    QryPesquisa: TFDQuery;
+    Edt_ValorTotal: TCurrencyEdit;
+    Label1: TLabel;
+    Edt_ValorMes: TCurrencyEdit;
+    Label2: TLabel;
+    CbbMes: TComboBox;
+    btnBuscar: TButton;
+    QryPesquisaCLI_NOME: TStringField;
+    Label3: TLabel;
+    Edt_CodigoCliente: TEdit;
+    Edt_Cliente: TEdit;
+    Label4: TLabel;
+    btnBuscarCliente: TButton;
+    QryPesquisaCOB_CODIGO: TIntegerField;
+    QryPesquisaCOB_MOVIMENTO: TIntegerField;
+    QryPesquisaCOB_DATAVENDA: TDateField;
+    QryPesquisaCOB_DATAVCTO: TDateField;
+    QryPesquisaCOB_NUMERODAPARCELA: TIntegerField;
+    QryPesquisaCOB_JUROS: TSingleField;
+    QryPesquisaCOB_MULTA: TSingleField;
+    QryPesquisaCOB_OBSERVACOES: TStringField;
+    QryPesquisaCOB_VALOR: TSingleField;
+    procedure btnCancelarClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormShow(Sender: TObject);
+    procedure carregar(AMes:Integer = 0;ACliCodigo:String = '');
+    procedure btnBuscarClick(Sender: TObject);
+    procedure GridDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure btnBuscarClienteClick(Sender: TObject);
+    procedure btnReceberClick(Sender: TObject);
+    procedure GridTitleClick(Column: TColumn);
+  private
+    { Private declarations }
+    QryTotal : TFDQuery;
+    ordenacao: string;
+    MesAtual,AnoAtual: Integer;
+    ValorTotal: Double;
+  public
+    { Public declarations }
+    destructor destroy;
+  end;
+
+var
+  FrmPesVencimentos: TFrmPesVencimentos;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao, uPesCliente, uCadPagamento;
+
+procedure TFrmPesVencimentos.btnBuscarClienteClick(Sender: TObject);
+begin
+  Try
+    FrmPesCliente := TFrmPesCliente.create(Self);
+    FrmPesCliente.ShowModal;
+  Finally
+    if FrmPesCliente.ModalResult = mrOk then
+    begin
+      Edt_CodigoCliente.Text := FrmPesCliente.QryPesquisaCLI_CODIGO.AsString;
+      Edt_Cliente.Text       := FrmPesCliente.QryPesquisaCLI_NOME.AsString;
+    end;
+    FrmPesCliente.Free;
+  End;
+end;
+
+procedure TFrmPesVencimentos.btnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmPesVencimentos.btnReceberClick(Sender: TObject);
+begin
+  Try
+    FrmCadRecebimento := TFrmCadRecebimento.Create(Self);
+    FrmCadRecebimento.ShowModal;
+  Finally
+    if FrmCadRecebimento.ModalResult = mrOk then
+      carregar();
+    FrmCadRecebimento.Free;
+  End;
+end;
+
+procedure TFrmPesVencimentos.btnBuscarClick(Sender: TObject);
+begin
+  Carregar(CbbMes.ItemIndex+1,Edt_CodigoCliente.Text)
+end;
+
+procedure TFrmPesVencimentos.carregar(AMes:Integer = 0;ACliCodigo:String = '');
+  procedure CarregarValorEdts;
+  begin
+    QryTotal.SQL.Clear;
+    QryTotal.SQL.Add('Select (select sum(cob_valor) from cobrancas '+
+                     'where (EXTRACT(MONTH FROM cob_datavcto)) = :MesAtual) As Mes, '+
+                     '(select sum(cob_valor) from cobrancas '+
+                     'where (EXTRACT(Year FROM cob_datavcto)) = :AnoAtual) As Ano '+
+                     'From cobrancas ');
+
+    QryTotal.ParamByName('MesAtual').AsInteger := MesAtual;
+    QryTotal.ParamByName('AnoAtual').AsInteger := AnoAtual;
+
+    QryTotal.Open
+  end;
+
+begin
+  if AMes > 0  then
+    MesAtual := AMes
+  else
+    MesAtual := MonthOf(Now);
+
+  AnoAtual := YearOf(Now);
+
+  QryPesquisa.SQL.Clear;
+  QryPesquisa.SQL.Add('select cob_codigo,cob_movimento,cli_nome,cob_datavenda,cob_datavcto, '+
+                      'cob_numerodaparcela,cob_juros,cob_multa, '+
+                      'cob_observacoes,cob_valor from cobrancas '+
+                      'join movimento on cob_movimento = mov_codigo '+
+                      'join cliente on mov_cliente = cli_codigo '+
+                      'where  '+
+                      '  cob_dataPagto IS NULL ');
+  if AMes > 0  then
+  begin
+    QryPesquisa.SQL.Add(' AND (EXTRACT(MONTH FROM cob_datavcto)) = :MesAtual ');
+    QryPesquisa.ParamByName('MesAtual').AsInteger := AMes;
+  end;
+
+  if ACliCodigo <> '' then
+    QryPesquisa.SQL.Add(' AND CLI_Codigo = ' + QuotedStr(ACliCodigo));
+
+  if ordenacao = '' then
+    QryPesquisa.SQL.Add(' Order By cob_datavcto ')
+  else
+    QryPesquisa.SQL.Add(ordenacao);
+
+
+  QryPesquisa.Open();
+
+  CarregarValorEdts;
+
+  ValorTotal := 0;
+
+  Edt_ValorTotal.Value := QryTotal.FieldByName('Ano').AsFloat;
+  QryPesquisa.First;
+
+  while Not QryPesquisa.EoF do
+  begin
+    ValorTotal := ValorTotal + QryPesquisacob_VALOR.AsFloat;
+    QryPesquisa.Next;
+  end;
+
+  Edt_ValorMes.Value := ValorTotal;
+end;
+
+destructor TFrmPesVencimentos.destroy;
+begin
+  QryTotal.Free;
+  inherited;
+end;
+
+procedure TFrmPesVencimentos.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #27 then
+    btnCancelarClick(Self);
+end;
+
+procedure TFrmPesVencimentos.FormShow(Sender: TObject);
+begin
+  QryTotal := TFDQuery.Create(nil);
+  QryTotal.Connection := fdmConexao.BANCO;
+
+  carregar;
+  QryPesquisa.First;
+end;
+
+procedure TFrmPesVencimentos.GridDrawColumnCell(Sender: TObject;
+  const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
+begin
+  if QryPesquisacob_DATAVCTO.AsDateTime < Now then
+  begin
+    if gdSelected in State then
+    begin
+      Grid.Canvas.Font.Color := clHighlightText;
+      Grid.Canvas.Brush.Color := clHighlight;
+      Grid.Canvas.Font.Style := [fsBold];
+    end
+    else
+    begin
+      Grid.Canvas.Font.Color := clRed;
+      Grid.Canvas.Font.Style := [fsBold];
+    end;
+  end;
+
+  Grid.DefaultDrawColumnCell(Rect, DataCol, Column, State);
+
+end;
+
+procedure TFrmPesVencimentos.GridTitleClick(Column: TColumn);
+begin
+  if Column.FieldName = 'CLI_NOME' then
+    ordenacao := 'cli_nome '
+  else
+  if Column.FieldName = 'COB_DATAVENDA' then
+    ordenacao := ' COB_DATAVENDA '
+  else
+  if Column.FieldName = 'COB_DATAVCTO' then
+    ordenacao := ' COB_DATAVCTO '
+  else
+  if Column.FieldName = 'COB_VALOR' then
+    ordenacao := ' COB_VALOR DESC'
+  else
+    exit;
+
+  ordenacao := ' Order By ' + ordenacao;
+  carregar(CbbMes.ItemIndex+1,Edt_CodigoCliente.Text);
+  QryPesquisa.First;
+end;
+
+End.

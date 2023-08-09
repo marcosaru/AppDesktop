@@ -1,0 +1,71 @@
+program ProjetoMain;
+
+uses
+  Vcl.Forms,
+  Main in 'Main.pas' {Principal},
+  dmConexao in 'dmConexao.pas' {fdmConexao: TDataModule},
+  uCadCliente in 'ViewsCadastro\uCadCliente.pas' {FrmCadCliente},
+  uCadFornecedor in 'ViewsCadastro\uCadFornecedor.pas' {FrmCadFornecedor},
+  uCadMovimento in 'ViewsCadastro\uCadMovimento.pas' {FrmCadMovimento},
+  uCadMunicipio in 'ViewsCadastro\uCadMunicipio.pas' {FrmCadMunicipio},
+  uCadProduto in 'ViewsCadastro\uCadProduto.pas' {FrmCadProduto},
+  uFiltroVenda in 'ViewsFiltros\uFiltroVenda.pas' {FrmFiltro},
+  uPesBairro in 'ViewsPesquisa\uPesBairro.pas' {FrmPesBairro},
+  uPesFornecedores in 'ViewsPesquisa\uPesFornecedores.pas' {FrmPesFornecedor},
+  uPesMunicipio in 'ViewsPesquisa\uPesMunicipio.pas' {FrmPesMunicipio},
+  uPesProduto in 'ViewsPesquisa\uPesProduto.pas' {FrmPesProduto},
+  BairroDAO in 'Classes\Bairro\BairroDAO.pas',
+  BairroDTO in 'Classes\Bairro\BairroDTO.pas',
+  ClienteDAO in 'Classes\Cliente\ClienteDAO.pas',
+  ClienteDTO in 'Classes\Cliente\ClienteDTO.pas',
+  FornecedorDAO in 'Classes\Fornecedor\FornecedorDAO.pas',
+  FornecedorDTO in 'Classes\Fornecedor\FornecedorDTO.pas',
+  MovimentoDAO in 'Classes\Movimento\MovimentoDAO.pas',
+  MovimentoDTO in 'Classes\Movimento\MovimentoDTO.pas',
+  MunicipioDAO in 'Classes\Municipio\MunicipioDAO.pas',
+  MunicipioDTO in 'Classes\Municipio\MunicipioDTO.pas',
+  ProdutoDAO in 'Classes\Produto\ProdutoDAO.pas',
+  ProdutoDTO in 'Classes\Produto\ProdutoDTO.pas',
+  uPesCliente in 'ViewsPesquisa\uPesCliente.pas' {FrmPesCliente},
+  uPesVenda in 'ViewsPesquisa\uPesVenda.pas' {FrmPesVenda},
+  ProdutoVenda in 'Classes\Produto\ProdutoVenda.pas',
+  uCadEmpresa in 'ViewsCadastro\uCadEmpresa.pas' {FrmCadEmpresa},
+  EmpresaDTO in 'Classes\Empresa\EmpresaDTO.pas',
+  EmpresaDAO in 'Classes\Empresa\EmpresaDAO.pas',
+  uConfigVenda in 'uConfigVenda.pas' {FrmConfigVenda},
+  FormaPagtoDTO in 'Classes\FormaPagamento\FormaPagtoDTO.pas',
+  FormaPagtoDAO in 'Classes\FormaPagamento\FormaPagtoDAO.pas',
+  CondicoesDTO in 'Classes\CondicoesPagamento\CondicoesDTO.pas',
+  CondicoesDAO in 'Classes\CondicoesPagamento\CondicoesDAO.pas',
+  uPesFormPagto in 'ViewsPesquisa\uPesFormPagto.pas' {FrmPesFormaPagamento},
+  uPesCondicoes in 'ViewsPesquisa\uPesCondicoes.pas' {FrmPesCondicoes},
+  uCadCondicoes in 'ViewsCadastro\uCadCondicoes.pas' {FrmCadCondicoes},
+  PagamentosMovimentoDTO in 'Classes\PagamentoMov\PagamentosMovimentoDTO.pas',
+  PagamentosMovimentoDAO in 'Classes\PagamentoMov\PagamentosMovimentoDAO.pas',
+  TransportadorDTO in 'Classes\Transportador\TransportadorDTO.pas',
+  TransportadorDAO in 'Classes\Transportador\TransportadorDAO.pas',
+  uPesTransportador in 'ViewsPesquisa\uPesTransportador.pas' {FrmPesTransportador},
+  uCadFormaPagamento in 'ViewsCadastro\uCadFormaPagamento.pas' {FrmCadFormaPagamento},
+  uCadBairro in 'ViewsCadastro\uCadBairro.pas' {FrmCadBairro},
+  uCadTransportador in 'ViewsCadastro\uCadTransportador.pas' {FrmCadTransportador},
+  uPesRelatorio in 'ViewsPesquisa\uPesRelatorio.pas' {FrmPesRelatorio},
+  RelatorioDTO in 'Classes\Relatorio\RelatorioDTO.pas',
+  uPesVencimentos in 'ViewsPesquisa\uPesVencimentos.pas' {FrmPesVencimentos},
+  uCadPagamento in 'ViewsCadastro\uCadPagamento.pas' {FrmCadRecebimento},
+  uPesEntregas in 'ViewsPesquisa\uPesEntregas.pas' {FrmPesEntrega},
+  EntregaDTO in 'Classes\Entrega\EntregaDTO.pas',
+  EntregaDAO in 'Classes\Entrega\EntregaDAO.pas',
+  LicencaDTO in 'Classes\Licenca\LicencaDTO.pas',
+  LicencaDAO in 'Classes\Licenca\LicencaDAO.pas',
+  uCadLicenca in 'ViewsCadastro\uCadLicenca.pas' {FrmLicenca};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfdmConexao, fdmConexao);
+  Application.CreateForm(TFrmLicenca, FrmLicenca);
+  Application.CreateForm(TPrincipal, Principal);
+  Application.Run;
+end.

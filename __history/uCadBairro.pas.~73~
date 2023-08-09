@@ -1,0 +1,192 @@
+unit uCadBairro;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,BairroDTO,BairroDAO,MunicipioDAO;
+
+type
+  TFrmCadBairro = class(TForm)
+    pnlCadastro: TPanel;
+    PnlBotoes: TPanel;
+    Edt_Codigo: TEdit;
+    Edt_Municipio: TEdit;
+    btnConfirmar: TButton;
+    btnCancelar: TButton;
+    CbbEstados: TComboBox;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label1: TLabel;
+    Edt_Nome: TEdit;
+    Label4: TLabel;
+    Edt_CodigoMunicipio: TEdit;
+    btnProcurarMunicipio: TButton;
+    procedure Edt_MunicipioExit(Sender: TObject);
+    procedure btnConfirmarClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnProcurarMunicipioClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+
+  private
+    { Private declarations }
+
+    BairroDTO: TBairroDTO;
+    BairroDAO: TBairroDAO;
+    MunicipioDAO : TMunicipioDAO;
+    procedure confirma;
+    procedure carregar;
+    procedure limpar;
+    procedure mudaStatus;
+  public
+  FStatus : integer;
+  constructor Create(AOwned:TComponent;FCodigo:Integer); overload;
+  constructor Create(AOwned:TComponent);overload;
+  destructor destroy;overload;
+
+  end;
+
+var
+  FrmCadBairro: TFrmCadBairro;
+
+implementation
+
+{$R *.dfm}
+uses uPesBairro, dmConexao, uPesMunicipio,MunicipioDTO;
+
+procedure TFrmCadBairro.btnConfirmarClick(Sender: TObject);
+begin
+  if Edt_Nome.Text = '' then
+  begin
+    ShowMessage('É Obrigatório informar um nome');
+    exit;
+  end;
+  if Trim(Edt_CodigoMunicipio.Text) = '' then
+   begin
+    ShowMessage('É Obrigatório informar um nome');
+    exit;
+  end;
+
+  confirma;
+  if MessageDlg('Deseja incluir mais um registro?',mtConfirmation,[mbYes,mbNo],0) = mrYes then
+  begin
+    limpar;
+    BairroDTO.Codigo := BairroDAO.encontrarCodigoMaximo;
+  end
+  else
+    ModalResult := mrOk;
+end;
+
+procedure TFrmCadBairro.btnProcurarMunicipioClick(Sender: TObject);
+begin
+  try
+    FrmPesMunicipio := TFrmPesMunicipio.Create(self);
+    FrmPesMunicipio.ShowModal;
+  finally
+    if FrmPesMunicipio.ModalResult = mrOk then
+    begin
+      Edt_Municipio.Text       := FrmPesMunicipio.QryPesquisaMUN_NOME.AsString;
+      Edt_CodigoMunicipio.Text := FrmPesMunicipio.QryPesquisaMUN_CODIGO.AsString;
+    end;
+  end;
+end;
+
+procedure TFrmCadBairro.carregar;
+begin
+  BairroDTO.CleanupInstance;
+  BairroDTO := BairroDAO.Encontrar(FrmPesBairro.QryPesquisaBAI_CODIGO.AsString);
+
+  Edt_Codigo.Text          := BairroDTO.Codigo;
+  Edt_Nome.Text            := BairroDTO.Nome;
+  Edt_CodigoMunicipio.Text := BairroDTO.Municipio.Codigo;
+  CbbEstados.ItemIndex     := StrToInt(BairroDTO.Estado);
+end;
+
+procedure TFrmCadBairro.confirma;
+begin
+  try
+    BairroDTO.CleanupInstance;
+
+    BairroDTO.Codigo    := Edt_Codigo.Text;
+    BairroDTO.Nome      := Edt_Nome.Text;
+    BairroDTO.Municipio := MunicipioDAO.Encontrar(Edt_CodigoMunicipio.Text);
+    BairroDTO.Estado    := (CbbEstados.ItemIndex+1).ToString;
+    if FStatus in [0,1] then
+      BairroDAO.salvar(BairroDTO)
+    else
+    if FStatus = 2 then
+      BairroDAO.alterar(BairrODTO);
+  finally
+
+  end;
+end;
+
+
+constructor TFrmCadBairro.Create(AOwned: TComponent);
+begin
+  inherited create(AOwned);
+  BairroDTO := TBairroDTO.Create;
+  BairroDAO := TBairroDAO.create;
+
+  MunicipioDAO := TMunicipioDAO.Create;
+end;
+
+constructor TFrmCadBairro.Create(AOwned: TComponent; FCodigo: Integer);
+begin
+  inherited create(AOwned);
+  FStatus := FCodigo;
+  MunicipioDAO := TMunicipioDAO.Create;
+  BairroDTO := TBairroDTO.Create;
+  BairroDAO := TBairroDAO.create;
+end;
+
+destructor TFrmCadBairro.destroy;
+begin
+  BairroDTO.Free;
+  BairroDAO.Free;
+  inherited;
+end;
+
+procedure TFrmCadBairro.Edt_MunicipioExit(Sender: TObject);
+begin
+  if Edt_Nome.Text <> '' then
+    FrmCadBairro.Caption := FrmCadBairro.Caption + Edt_Nome.Text;
+end;
+
+procedure TFrmCadBairro.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if key = VK_ESCAPE then
+    btnCancelar.Click();
+end;
+
+procedure TFrmCadBairro.FormShow(Sender: TObject);
+begin
+  if FStatus = 1 then
+  begin
+    limpar;
+    BairroDTO.Codigo := BairroDAO.encontrarCodigoMaximo;
+    Edt_Codigo.Text := BairroDTO.Codigo;
+  end
+  else
+  if FStatus in [2,3] then
+    carregar;
+
+  mudaStatus;
+
+end;
+
+procedure TFrmCadBairro.limpar;
+begin
+  Edt_Municipio.Text := '';
+  Edt_Nome.Text := '';
+  CbbEstados.ItemIndex := 0;
+end;
+
+procedure TFrmCadBairro.mudaStatus;
+begin
+  pnlCadastro.Enabled  := FStatus <> 3;
+  btnConfirmar.Enabled := FStatus <> 3;
+end;
+
+end.

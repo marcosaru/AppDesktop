@@ -1,0 +1,175 @@
+object FrmPesBairro: TFrmPesBairro
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'Bairros'
+  ClientHeight = 441
+  ClientWidth = 650
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pnlMain: TPanel
+    Left = -8
+    Top = 0
+    Width = 553
+    Height = 441
+    TabOrder = 0
+    object DBGrid1: TDBGrid
+      Left = 1
+      Top = 1
+      Width = 551
+      Height = 439
+      Align = alClient
+      DataSource = DtsBairro
+      TabOrder = 0
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -11
+      TitleFont.Name = 'Tahoma'
+      TitleFont.Style = []
+      OnDblClick = DBGrid1DblClick
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'BAI_CODIGO'
+          Title.Caption = 'CODIGO'
+          Width = 50
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'BAI_NOME'
+          Title.Caption = 'NOME'
+          Width = 150
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MUN_NOME'
+          Title.Caption = 'MUNICIPIO'
+          Width = 150
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'EST_NOME'
+          Title.Caption = 'ESTADO'
+          Visible = True
+        end>
+    end
+  end
+  object pnlBotoes: TPanel
+    Left = 546
+    Top = 0
+    Width = 104
+    Height = 441
+    Align = alRight
+    BevelOuter = bvNone
+    TabOrder = 1
+    object btnCadastrar: TButton
+      Left = 16
+      Top = 24
+      Width = 75
+      Height = 25
+      Caption = 'Cadastrar'
+      TabOrder = 0
+      OnClick = btnCadastrarClick
+    end
+    object btnAlterar: TButton
+      Left = 16
+      Top = 55
+      Width = 75
+      Height = 25
+      Caption = 'Alterar'
+      TabOrder = 1
+      OnClick = btnAlterarClick
+    end
+    object btnApresentar: TButton
+      Left = 16
+      Top = 86
+      Width = 75
+      Height = 25
+      Caption = 'Apresentar'
+      TabOrder = 2
+    end
+    object btnCancelar: TButton
+      Left = 16
+      Top = 117
+      Width = 75
+      Height = 25
+      Caption = 'Cancelar'
+      ModalResult = 2
+      TabOrder = 3
+    end
+  end
+  object DtsBairro: TDataSource
+    DataSet = QryPesquisa
+    Left = 592
+    Top = 216
+  end
+  object QryPesquisa: TFDQuery
+    Connection = fdmConexao.BANCO
+    SQL.Strings = (
+      
+        'select bai_codigo,bai_nome,mun_nome,mun_codigo,est_nome,est_codi' +
+        'go from bairro'
+      'join municipio'
+      'on mun_codigo = bai_municipio'
+      'join estado'
+      'on mun_estado = est_codigo')
+    Left = 592
+    Top = 160
+    object QryPesquisaBAI_NOME: TStringField
+      FieldName = 'BAI_NOME'
+      Origin = 'BAI_NOME'
+      Size = 100
+    end
+    object QryPesquisaBAI_CODIGO: TIntegerField
+      FieldName = 'BAI_CODIGO'
+      Origin = 'BAI_CODIGO'
+      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
+      Required = True
+    end
+    object QryPesquisaMUN_NOME: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'MUN_NOME'
+      Origin = 'MUN_NOME'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 100
+    end
+    object QryPesquisaEST_NOME: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'EST_NOME'
+      Origin = 'EST_NOME'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 2
+    end
+    object QryPesquisaMUN_CODIGO: TIntegerField
+      AutoGenerateValue = arDefault
+      FieldName = 'MUN_CODIGO'
+      Origin = 'MUN_CODIGO'
+      ProviderFlags = []
+      ReadOnly = True
+    end
+    object QryPesquisaEST_CODIGO: TIntegerField
+      AutoGenerateValue = arDefault
+      FieldName = 'EST_CODIGO'
+      Origin = 'EST_CODIGO'
+      ProviderFlags = []
+      ReadOnly = True
+    end
+  end
+end

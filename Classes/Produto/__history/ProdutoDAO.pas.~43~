@@ -1,0 +1,198 @@
+unit ProdutoDAO;
+
+interface
+uses ProdutoDTO,FornecedorDTO,FornecedorDAO,FireDAC.Stan.Intf, FireDAC.Stan.Option,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client,Vcl.Dialogs,System.SysUtils,
+    System.Generics.Collections,ProdutoVenda,MovimentoDTO;
+  type
+    TProdutoDAO = class
+      private
+        FStatus       : integer;
+        ProdutoDTO    : TProdutoDTO;
+        QryPesquisa   : TFDQuery;
+        QryCadastro   : TFDQuery;
+        QryAuxiliar   : TFDQuery;
+        FornecedorDTO : TFornecedorDTO;
+        FornecedorDAO : TFornecedorDAO;
+      public
+        procedure salvar(ProdutoDTO:TProdutoDTO);
+        procedure SalvarLista(Movimento:TMovimentoDTO);
+        procedure alterar(ProdutoDTO:TProdutoDTO);
+        function EncontrarProduto(ACodigo:String): TProdutoDTO;
+        function EncontrarLista(Movimento:TMovimentoDTO):TObjectList<TProdutoVenda>;
+        constructor create(ACodigo:integer);
+        destructor destroy;
+    end;
+
+implementation
+
+{ TProdutoDAO }
+
+uses dmConexao;
+
+procedure TProdutoDAO.alterar(ProdutoDTO: TProdutoDTO);
+begin
+  FStatus := 2;
+  salvar(ProdutoDTO);
+end;
+
+constructor TProdutoDAO.create(ACodigo:integer);
+begin
+  QryCadastro := TFDQuery.Create(nil);
+  QryPesquisa := TFDQuery.Create(nil);
+  QryAuxiliar := TFDQuery.Create(nil);
+
+  QryCadastro.Connection := fdmConexao.BANCO;
+  QryPesquisa.Connection := fdmConexao.BANCO;
+  QryAuxiliar.Connection := fdmConexao.BANCO;
+
+  FornecedorDAO := TFornecedorDAO.Create;
+end;
+
+destructor TProdutoDAO.destroy;
+begin
+   FreeAndNil(QryPesquisa);
+   FreeAndNil(QryCadastro);
+   FreeAndNil(QryAuxiliar);
+
+   FreeAndNil(FornecedorDAO);
+end;
+
+function TProdutoDAO.EncontrarLista(Movimento:TMovimentoDTO): TObjectList<TProdutoVenda>;
+  var
+    ProdutoEmpilhar,ProdutoEncontrado : TProdutoDTO;
+
+    ProdutoDAO : TProdutoDAO;
+    Produto : TProdutoVenda;
+  begin
+    QryAuxiliar.Sql.CLear;
+    QryAuxiliar.sql.add('select * from movimentoitens where mitens_movimento = '+Movimento.Codigo);
+    QryAuxiliar.Open();
+    if QryAuxiliar.RecordCount > 0  then
+    begin
+      ProdutoDAO := TProdutoDAO.create(1);
+      Produto := TProdutoVenda.Create;
+
+      QryAuxiliar.First;
+      while not QryAuxiliar.EoF do
+      begin
+        ProdutoEncontrado := ProdutoDAO.EncontrarProduto(QryAuxiliar.FieldByName('mitens_produto').AsString);
+
+        ProdutoEmpilhar := ProdutoEncontrado.Clone(ProdutoEncontrado);
+
+        Produto.Produto := ProdutoEmpilhar;
+        Produto.Quantidade := QryAuxiliar.FieldByName('mitens_Quantidade').AsFloat;
+        Produto.Preco := QryAuxiliar.FieldByName('mitens_Preco').AsFloat;
+
+
+        Movimento.Produtos.Add(Produto.Clone(Produto));
+        QryAuxiliar.Next;
+      end;
+      result := Movimento.Produtos;
+    end;
+end;
+
+function TProdutoDAO.EncontrarProduto(ACodigo: String): TProdutoDTO;
+begin
+  QryPesquisa.sql.clear;
+  QryPesquisa.sql.Add('select * from produto where pro_codigo = '+ACodigo);
+  QryPesquisa.open;
+
+  if QryPesquisa.RecordCount > 0 then
+  begin
+    with QryPesquisa do
+    begin
+      FornecedorDTO     := FornecedorDAO.EncontrarFornecedor(FieldByName('PRO_FORNECEDOR').AsString);
+
+      produtoDTO.Codigo := FieldByName('PRO_CODIGO').AsString;
+      produtoDTO.Fornecedor := FornecedorDTO;
+      produtoDTO.Nome := FieldByName('PRO_NOME').AsString;
+      produtoDTO.Custo := FieldByName('PRO_CUSTO').AsFloat;
+      produtoDTO.ValorVenda := FieldByName('pro_valorvenda').AsFloat;
+      produtoDTO.Descricao := FieldByName('pro_descricao').AsString;
+      produtoDTO.Medidas := FieldByName('pro_medidas').AsString;
+      produtoDTO.Tecido := FieldByName('pro_tecido').AsString;
+      produtoDTO.Madeira := FieldByName('pro_madeira').AsString;
+      result := ProdutoDTO;
+    end;
+
+
+  end;
+
+end;
+
+procedure TProdutoDAO.salvar(ProdutoDTO: TProdutoDTO);
+begin
+  if fdmConexao.BANCO.InTransaction then
+    fdmConexao.BANCO.Rollback;
+
+  fdmConexao.BANCO.StartTransaction;
+
+  QryCadastro.sql.Clear;
+  if FStatus in [0,1] then
+  QryCadastro.sql.add('INSERT INTO PRODUTO (pro_codigo,pro_nome,pro_fornecedor, '+
+                                           'pro_custo,pro_valorvenda,pro_descricao, '+
+                                           'pro_medidas,pro_tecido,pro_madeira) '+
+                                           'VALUES '+
+                                           '(:pro_codigo,:pro_nome,:pro_fornecedor, '+
+                                           ':pro_custo,:pro_valorvenda,:pro_descricao, '+
+                                           ':pro_medidas,:pro_tecido,:pro_madeira) ')
+  else
+  if FStatus = 2 then
+    QryCadastro.sql.Add('UPDATE PRODUTO SET  pro_codigo=:pro_codigo,         '+
+                                             'pro_nome=:pro_nome,             '+
+                                             'pro_fornecedor=:pro_fornecedor, '+
+                                             'pro_custo=:pro_custo,           '+
+                                             'pro_valorvenda=:pro_valorvenda, '+
+                                             'pro_descricao=:pro_descricao,   '+
+                                             'pro_medidas=:pro_medidas,       '+
+                                             'pro_tecido=:pro_tecido,         '+
+                                             'pro_madeira=:pro_madeira where pro_codigo = '+ProdutoDTO.Codigo);
+
+  QryCadastro.ParamByName('pro_codigo').AsString := ProdutoDTO.Codigo;
+  QryCadastro.ParamByName('pro_nome').AsString := ProdutoDTO.Nome;
+  QryCadastro.ParamByName('pro_fornecedor').AsString:= ProdutoDTO.Fornecedor.Codigo;
+  QryCadastro.ParamByName('pro_custo').AsFloat  := ProdutoDTO.Custo;
+  QryCadastro.ParamByName('pro_valorvenda').AsFloat  := ProdutoDTO.ValorVenda;
+  QryCadastro.ParamByName('pro_descricao').AsString := ProdutoDTO.Descricao;
+  QryCadastro.ParamByName('pro_medidas').AsString := ProdutoDTO.Medidas;
+  QryCadastro.ParamByName('pro_tecido').AsString := ProdutoDTO.Tecido;
+  QryCadastro.ParamByName('pro_madeira').AsString := ProdutoDTO.Madeira;
+
+  QryCadastro.ExecSQL;
+  fdmConexao.BANCO.Commit;
+
+end;
+
+procedure TProdutoDAO.SalvarLista(Movimento:TMovimentoDTO);
+  var
+    novoProduto : TProdutoVenda;
+begin
+  novoProduto := TProdutoVenda.Create;
+
+  fdmConexao.BANCO.StartTransaction;
+
+  for novoProduto in Movimento.Produtos do
+  begin
+    QryCadastro.sql.clear;
+    QryCadastro.sql.add('insert into movimentoitens '+
+                        '(Mitens_codigo,Mitens_movimento, '+
+                        'Mitens_produto,Mitens_Cliente,mitens_quantidade,mitens_preco) values '+
+                        '(:Mitens_codigo,:Mitens_movimento, '+
+                        ':Mitens_produto,:Mitens_Cliente,:mitens_quantidade,:mitens_preco)');
+    QryCadastro.Params[0].AsString :=
+    fdmConexao.retornaCodigoMaximo('Mitens_codigo','MovimentoItens');
+    QryCadastro.Params[1].AsString := Movimento.Codigo;
+    QryCadastro.Params[2].AsString := novoProduto.Produto.Codigo;
+    QryCadastro.Params[3].AsString := Movimento.Cliente.Codigo;
+    QryCadastro.Params[4].AsFloat := novoProduto.Quantidade;
+    QryCadastro.Params[5].AsFloat := novoProduto.Produto.ValorVenda;
+    QryCadastro.ExecSQL;
+  end;
+
+  fdmConexao.BANCO.Commit;
+end;
+
+end.

@@ -1,0 +1,95 @@
+object FrmPesEntrega: TFrmPesEntrega
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'Entregas'
+  ClientHeight = 449
+  ClientWidth = 658
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pnlMain: TPanel
+    Left = 0
+    Top = 0
+    Width = 554
+    Height = 449
+    Align = alClient
+    TabOrder = 0
+    object Grid: TDBGrid
+      Left = 1
+      Top = 1
+      Width = 552
+      Height = 447
+      Align = alClient
+      DataSource = DtsEntregas
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
+      TabOrder = 0
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -11
+      TitleFont.Name = 'Tahoma'
+      TitleFont.Style = []
+    end
+  end
+  object pnlBotoes: TPanel
+    Left = 554
+    Top = 0
+    Width = 104
+    Height = 449
+    Align = alRight
+    BevelOuter = bvNone
+    TabOrder = 1
+    object btnCadastrar: TButton
+      Left = 16
+      Top = 24
+      Width = 75
+      Height = 25
+      Caption = 'Cadastrar'
+      TabOrder = 0
+    end
+    object Button1: TButton
+      Left = 16
+      Top = 55
+      Width = 75
+      Height = 25
+      Caption = 'Alterar'
+      TabOrder = 1
+    end
+    object Button2: TButton
+      Left = 16
+      Top = 86
+      Width = 75
+      Height = 25
+      Caption = 'Apresentar'
+      TabOrder = 2
+    end
+    object Button3: TButton
+      Left = 16
+      Top = 117
+      Width = 75
+      Height = 25
+      Caption = 'Cancelar'
+      TabOrder = 3
+    end
+  end
+  object DtsEntregas: TDataSource
+    DataSet = QryPesquisa
+    Left = 592
+    Top = 376
+  end
+  object QryPesquisa: TFDQuery
+    Connection = fdmConexao.BANCO
+    SQL.Strings = (
+      'select * from cliente')
+    Left = 592
+    Top = 320
+  end
+end

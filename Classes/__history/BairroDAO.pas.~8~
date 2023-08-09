@@ -1,0 +1,91 @@
+unit BairroDAO;
+
+
+
+interface
+uses BairroDTO,FireDAC.Stan.Intf, FireDAC.Stan.Option,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+  type
+    TBairroDAO = class
+      procedure create; overload;
+      procedure destroy; overload;
+      public
+        mStatus:integer;
+        function salvar(Bairro: TBairroDTO): boolean;
+        function alterar(Bairro: TBairroDTO):Boolean;
+        function inativar(Bairro:TBairroDTO):Boolean;
+      private
+        QryCadastro : TFDQuery;
+        QryPesquisa  : TFDQuery;
+    end;
+
+implementation
+
+{ TBairroDAO }
+
+uses dmConexao;
+
+function TBairroDAO.alterar(Bairro: TBairroDTO): Boolean;
+begin
+  mStatus := 2;
+  salvar(Bairro);
+end;
+
+procedure TBairroDAO.create;
+begin
+  QryCadastro.ConnectionName :=  'BANCO';
+  QryPesquisa.ConnectionName := 'BANCO';
+end;
+ {
+procedure TBairroDAO.destroy;
+begin
+   QryCadastro.free;
+   QryPesquisa.free;
+   inherited;
+end;
+
+function TBairroDAO.inativar(Bairro: TBairroDTO): Boolean;
+begin
+    //
+end;
+
+function TBairroDAO.salvar(Bairro: TBairroDTO): boolean;
+
+begin
+  if mStatus = 1 then
+  begin
+    QryCadastro.SQL.Clear;
+    QryCadastro.SQL.Add('INSERT INTO CLIENTE'+
+                        '( ) '+
+                        'VALUES '+
+                        '()');
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.ExecSQL;
+  end
+  else
+  if mStatus = 2 then
+  begin
+    QryCadastro.SQL.Clear;
+    QryCadastro.SQL.Add('UPDATE SET CLIENTE'+
+                        '()');
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.Params[0].AsString :=
+    QryCadastro.ExecSQL;
+  end;
+
+end;
+         }
+end.

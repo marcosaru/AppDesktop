@@ -1,0 +1,105 @@
+unit uPesFornecedores;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client;
+
+type
+  TFrmPesFornecedores = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnCadastrar: TButton;
+    btnAlterar: TButton;
+    btnApresentar: TButton;
+    btnCancelar: TButton;
+    DBGrid1: TDBGrid;
+    DT: TDataSource;
+    QryPesquisa: TFDQuery;
+    QryPesquisaFOR_CODIGO: TIntegerField;
+    QryPesquisaFOR_NOME: TStringField;
+    QryPesquisaMUN_NOME: TStringField;
+    procedure FormShow(Sender: TObject);
+    procedure CARREGA;
+    procedure controlaStatus;
+    procedure btnCadastrarClick(Sender: TObject);
+    procedure btnApresentarClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure btnCancelarClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmPesFornecedores: TFrmPesFornecedores;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao, uCadFornecedor;
+
+procedure TFrmPesFornecedores.btnApresentarClick(Sender: TObject);
+begin
+   try
+    FrmCadFornecedor := TFrmCadFornecedor.create(Self,3);
+    FrmCadFornecedor.ShowModal;
+  finally
+    if FrmCadFornecedor.ModalResult = mrOk then
+      carrega;
+    FrmCadFornecedor.free;
+  end;
+end;
+
+procedure TFrmPesFornecedores.btnCadastrarClick(Sender: TObject);
+begin
+  try
+    FrmCadFornecedor := TFrmCadFornecedor.create(Self,1);
+    FrmCadFornecedor.ShowModal;
+  finally
+    if FrmCadFornecedor.ModalResult = mrOk then
+      carrega;
+    FrmCadFornecedor.free;
+  end;
+end;
+
+procedure TFrmPesFornecedores.btnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmPesFornecedores.CARREGA;
+begin
+  QryPesquisa.sql.Clear;
+  QryPesquisa.SQl.Add('select for_codigo,for_nome,mun_nome from fornecedor '+
+                      'join municipio on mun_codigo = for_municipio');
+  QryPesquisa.Open;
+end;
+
+procedure TFrmPesFornecedores.controlaStatus;
+begin
+  btnAlterar.Enabled    := QryPesquisa.RecordCount >0;
+  btnApresentar.Enabled := QryPesquisa.RecordCount >0;
+end;
+
+procedure TFrmPesFornecedores.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if key = ESCAPE then
+    btnCancelarClick(self);
+end;
+
+procedure TFrmPesFornecedores.FormShow(Sender: TObject);
+begin
+  CARREGA;
+  controlaStatus;
+end;
+
+end.

@@ -1,0 +1,264 @@
+unit uCadCondicoes;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, CondicoesDTO,CondicoesDAO,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Mask;
+
+type
+  TFrmCadCondicoes = class(TForm)
+    pnlCadastro: TPanel;
+    pnlBotoes: TPanel;
+    Edt_Codigo: TEdit;
+    Edt_Descricao: TEdit;
+    btnConfirmar: TButton;
+    btnCancelar: TButton;
+    Label1: TLabel;
+    Label2: TLabel;
+    chkParcelas: TCheckBox;
+    pnlMeses: TPanel;
+    pnlDias: TPanel;
+    Edt_Parcelas: TMaskEdit;
+    Label3: TLabel;
+    CbbMeses: TComboBox;
+    Label4: TLabel;
+    pnlEscolha: TPanel;
+    ChkDias: TCheckBox;
+    ChkMeses: TCheckBox;
+    procedure btnCancelarClick(Sender: TObject);
+    procedure btnConfirmarClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure chkParcelasClick(Sender: TObject);
+    procedure ChkDiasClick(Sender: TObject);
+    procedure ChkMesesClick(Sender: TObject);
+  private
+    { Private declarations }
+    FStatus       : Integer;
+    Condicoes    : TCondicoesDTO;
+    CondicoesDAO: TCondicoesDAO;
+    procedure Limpar;
+    procedure confirma;
+    procedure controlaStatus;
+    procedure Carregar;
+  public
+    { Public declarations }
+    constructor create(AOwner:TComponent;AStatus:integer);overload;
+  end;
+
+var
+  FrmCadCondicoes: TFrmCadCondicoes;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao, uPesFormPagto;
+
+procedure TFrmCadCondicoes.btnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmCadCondicoes.btnConfirmarClick(Sender: TObject);
+begin
+  confirma;
+end;
+
+procedure TFrmCadCondicoes.Carregar;
+begin
+  try
+    CondicoesDAO := TCondicoesDAO.create;
+    Condicoes    := CondicoesDAO.Encontrar(FrmPesFormaPagamento.QryPesquisaFORPAGTO_CODIGO.AsString);
+
+    Edt_Codigo.Text    := Condicoes.Codigo;
+    Edt_Descricao.Text := Condicoes.Descricao;
+  finally
+    Condicoes.Free;
+    CondicoesDAO.Free;
+  end;
+end;
+
+procedure TFrmCadCondicoes.ChkDiasClick(Sender: TObject);
+begin
+  if ChkDias.Checked then
+  begin
+    pnlDias.Visible := true;
+    if ChkMeses.Checked then
+      ChkMeses.Checked := false;
+  end
+  else
+    pnlDias.Visible := false;
+end;
+
+procedure TFrmCadCondicoes.ChkMesesClick(Sender: TObject);
+begin
+  if ChkMeses.Checked then
+  begin
+    pnlMeses.Visible := true;
+    if ChkDias.Checked then
+      ChkDias.Checked := false;
+  end
+  else
+    pnlMeses.Visible := false;
+end;
+
+procedure TFrmCadCondicoes.chkParcelasClick(Sender: TObject);
+begin
+  if chkParcelas.Checked then
+  begin
+    pnlEscolha.Visible := true;
+    Edt_Descricao.Text := '';
+    Edt_Descricao.Enabled := false;
+  end
+  else
+  begin
+    Edt_Descricao.Text := '';
+    Edt_Descricao.Enabled := true;
+    pnlEscolha.Visible := false;
+    if ChkDias.Checked then
+      ChkDias.Checked := false;
+    if chkMeses.Checked then
+      chkMeses.Checked := false;
+  end;
+end;
+
+procedure TFrmCadCondicoes.confirma;
+var
+  Checar: boolean;
+  Procedure preencherDias;
+    var
+    LastChar : Char;
+    Dias: String;
+    Descricao: string;
+    I: Integer;
+  Begin
+    if Edt_Parcelas.Text <> '' then
+    begin
+      Dias := Edt_Parcelas.Text;
+      Dias := Dias.Replace('/','');
+      Dias := Trim(Dias);
+      if Length(Dias) mod 3 <> 0 then
+      begin
+        ShowMessage('O Formato esta incorreto por favor insira dessa forma: 000/000/...');
+        Exit;
+      end;
+      Descricao := '';
+      for I := 1 to Length(Dias) do
+      begin
+        Descricao := Descricao + Dias[i];
+        if i mod 3 = 0 then
+          Descricao := Descricao + '/';
+      end;
+      i := Length(Descricao);
+      if Descricao[i] = '/' then
+        Descricao[i] := ' ';
+
+      Condicoes.Descricao := Trim(Descricao);
+      Checar := true;
+    end;
+  End;
+
+  procedure PreencherMeses;
+  var
+  I: Integer;
+  Dias: Integer;
+  DiasStr:String;
+  Begin
+    Dias := 0;
+    for i := 1 to (CbbMeses.ItemIndex) do
+    begin
+    Dias:= Dias + 30;
+      if Dias < 100 then
+        DiasStr := '0'+ IntToStr(Dias)
+      else
+        DiasStr := IntToStr(Dias);
+      Edt_Descricao.Text := Edt_Descricao.Text + DiasStr;
+      if I <> CbbMeses.Items.Count then
+        Edt_Descricao.Text := Edt_Descricao.Text + '/';
+
+    end;
+  End;
+
+begin
+  try
+    CondicoesDAO := TCondicoesDAO.create;
+    Condicoes := TCondicoesDTO.Create;
+    Checar := false;
+
+    Condicoes.Codigo := Edt_Codigo.Text;
+    Condicoes.Descricao := Edt_Descricao.Text;
+    if Trim(Condicoes.Descricao) = '' then
+      if ChkDias.Checked then
+        PreencherDias
+      else PreencherMeses;
+
+    if Checar = false then
+      exit;
+    if FStatus in [0,1] then
+      CondicoesDAO.salvar(Condicoes)
+    else
+    begin
+      CondicoesDAO.Alterar(Condicoes);
+      ModalResult := mrOk;
+    end;
+     if MessageDlg('Deseja adicionar outro registro?',mtConfirmation,[MbYes,MbNo],0) = MrYes then
+     begin
+       Limpar;
+       Edt_Codigo.Text := fdmConexao.retornaCodigoMaximo('con_codigo','condicoes');
+     end
+     else
+     ModalResult := mrOk;
+  finally
+    CondicoesDAO.Free;
+    Condicoes.Free;
+  end;
+end;
+
+procedure TFrmCadCondicoes.controlaStatus;
+begin
+  btnConfirmar.Enabled := FStatus <> 3;
+end;
+
+constructor TFrmCadCondicoes.create(AOwner: TComponent; AStatus: integer);
+begin
+  inherited create(AOwner);
+  FStatus := AStatus;
+end;
+
+procedure TFrmCadCondicoes.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Key = VK_Escape then
+    btnCancelarClick(nil);
+end;
+
+procedure TFrmCadCondicoes.FormShow(Sender: TObject);
+begin
+  if FStatus = 1 then
+  begin
+    Limpar;
+    Edt_Codigo.Text := fdmConexao.retornaCodigoMaximo('con_codigo','condicoes');
+  end
+  else
+  if FStatus = 2 then
+    Carregar
+  else
+  if FStatus = 3 then
+  begin
+    Carregar;
+    pnlCadastro.Enabled := false;
+  end;
+
+  controlaStatus;
+end;
+
+procedure TFrmCadCondicoes.Limpar;
+begin
+  Edt_Codigo.Text := '';
+  Edt_Descricao.Text := '';
+end;
+
+end.

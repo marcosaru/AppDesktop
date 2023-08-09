@@ -1,0 +1,21 @@
+unit BairroDTO;
+
+interface
+  type
+  TBairroDTO = class
+  private
+    FCodigo: string;
+    Fnome : string;
+    FEstado : string;
+    FMunicipio: string;
+  public
+    property Codigo: string read FCodigo write FCodigo;
+    property Nome: string read FNome write FNome;
+    property Estado: string read FEstado write FEstado;
+    property Municipio: string read FMunicipio write FMunicipio;
+
+  end;
+
+implementation
+
+end.

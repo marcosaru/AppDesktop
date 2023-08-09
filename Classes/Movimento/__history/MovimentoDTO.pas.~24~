@@ -1,0 +1,76 @@
+unit MovimentoDTO;
+
+interface
+uses ClienteDTO,produtoDTO,System.Generics.Collections,SysUtils,ProdutoVenda,
+     FormaPagtoDTO,CondicoesDTO,PagamentosMovimentoDTO,PagamentoDTO;
+  type
+    TMovimentoDTO = class
+      private
+        FCodigo        : string;
+        FCliente       : TClienteDTO;
+        FData          : TDateTime;
+        FTipo          : string;
+        FObservacoes   : string;
+        FObsEntrega    : string;
+        FTotalProdutos : Real;
+        FTotalServicos : Real;
+        FAcrescimo     : Real;
+        FDesconto      : Real;
+        FFrete         : Real;
+        FQtdeItens     : Real;
+        FValorTotal    : Real;
+        FFormaPagto    : TFormaPagtoDTO;
+        FCondicao      : TCondicoesDTO;
+        FProdutos      : TObjectList<TProdutoVenda>;
+        FPagamentos    : TObjectList<TPagamentosMovimentoDTO>;
+        FPagamento     :TObjectList<TPagamentoDTO>;
+    function GetFormattedData: string;
+      public
+        property Codigo : string read FCodigo write FCodigo;
+        property Produtos: TObjectList<TProdutoVenda> read FProdutos write FProdutos;
+        property Cliente : TClienteDTO read FCliente write FCliente;
+        property Data : TDateTime read FData write FData;
+        property Tipo : string read FTipo write FTipo;
+        property Observacoes : string read FObservacoes write FObservacoes;
+        property Entrega : string read FObsEntrega write FObsEntrega;
+        property TotalProdutos : Real read FTotalProdutos write FTotalProdutos;
+        property TotalServicos : Real read FTotalServicos write FTotalServicos;
+        property Acrescimo : Real read FAcrescimo write FAcrescimo;
+        property Desconto : Real read FDesconto write FDesconto;
+        property Frete : Real read FFrete write FFrete;
+        property QtdadeItens : Real read FQtdeItens write FQtdeItens;
+        property ValorTotal : Real read FValorTotal write FValorTotal;
+        property Pagamentos : TObjectList<TPagamentosMovimentoDTO> read FPagamentos write FPagamentos;
+        property FormasPgto : TObjectList<TPagamentoDTO> read FPagamento write FPagamento;
+        property FormaPagto : TFormaPagtoDTO read FFormaPagto write FFormaPagto;
+        property CondicaoPagto : TCondicoesDTO read FCondicao write FCondicao;
+        constructor create;
+        destructor destroy;
+
+      property FormattedData: string read GetFormattedData;
+    end;
+
+implementation
+
+{ TMovimentoDTO }
+
+constructor TMovimentoDTO.create;
+begin
+  FProdutos   := TObjectList<TProdutoVenda>.Create;
+  FPagamentos := TObjectList<TPagamentosMovimentoDTO>.Create;
+  FPagamento  := TObjectList<TPagamentoDTO>.Create;
+end;
+
+destructor TMovimentoDTO.destroy;
+begin
+  FreeAndNil(FProdutos);
+  FreeAndNil(FPagamentos);
+  FreeAndNil(FPagamento);
+end;
+
+function TMovimentoDTO.GetFormattedData: string;
+begin
+  Result := FormatDateTime('yyyy/mm/dd - hh:nn:ss', FData);
+end;
+
+end.

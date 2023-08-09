@@ -1,0 +1,54 @@
+unit EmpresaDTO;
+
+interface
+uses BairroDTO,MunicipioDTO,System.Sysutils,System.Classes;
+  type
+    TEmpresaDTO = class
+      private
+        FCod : string;
+        FNome: String;
+        FCNPJ: String;
+        FBairro: TBairroDTO;
+        FMunicipio: TMunicipioDTO;
+        FEndereco: String;
+        FInscricao: String;
+        FFantasia: String;
+        FEmail: String;
+        FFundacao: TDate;
+        FLogo: TArray<System.Byte>;
+        FLogoStream: TMemoryStream;
+        FLogoData: TBytes;
+      public
+        property Codigo: string read FCod write FCod;
+        property Nome: string read FNome write FNome;
+        property CNPJ: string read FCNPJ write FCNPJ;
+        property Bairro: TBairroDTO read FBairro write FBairro;
+        property Municipio: TMunicipioDTO read FMunicipio write FMunicipio;
+        property Endereco: string read FEndereco write FEndereco;
+        property Inscricao: string read FInscricao write FInscricao;
+        property Fantasia: string read FFantasia write FFantasia;
+        property Email: string read FEmail write FEmail;
+        property Fundacao: TDate read FFundacao write FFundacao;
+        property Logo: TArray<System.Byte> read FLogo write FLogo;
+        property LogoStream: TMemoryStream read FLogoStream write FLogoStream;
+        constructor create;
+        procedure definirTamanho(ALengh: Integer);
+    end;
+
+implementation
+
+{ TEmpresaDTO }
+
+{ TEmpresaDTO }
+
+constructor TEmpresaDTO.create;
+begin
+  FLogo := nil;
+end;
+
+procedure TEmpresaDTO.definirTamanho(ALengh: Integer);
+begin
+   SetLength(FLogo,ALengh);
+end;
+
+end.

@@ -1,0 +1,161 @@
+object FrmFiltro: TFrmFiltro
+  Left = 0
+  Top = 0
+  Caption = 'Filtro'
+  ClientHeight = 218
+  ClientWidth = 543
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pnlBotoes: TPanel
+    Left = 422
+    Top = 0
+    Width = 121
+    Height = 218
+    Align = alRight
+    TabOrder = 0
+    ExplicitLeft = 328
+    ExplicitHeight = 155
+    object btnConfirmar: TButton
+      Left = 24
+      Top = 40
+      Width = 75
+      Height = 25
+      Caption = 'Confirmar'
+      TabOrder = 0
+    end
+    object btnCancelar: TButton
+      Left = 24
+      Top = 71
+      Width = 75
+      Height = 25
+      Caption = 'Cancelar'
+      TabOrder = 1
+      OnClick = btnCancelarClick
+    end
+  end
+  object pnlOpcoes: TPanel
+    Left = 0
+    Top = 0
+    Width = 422
+    Height = 218
+    Align = alClient
+    TabOrder = 1
+    ExplicitLeft = 136
+    ExplicitTop = 64
+    ExplicitWidth = 185
+    ExplicitHeight = 41
+    object Label1: TLabel
+      Left = 8
+      Top = 75
+      Width = 27
+      Height = 13
+      Caption = 'Inicial'
+    end
+    object Label2: TLabel
+      Left = 7
+      Top = 111
+      Width = 27
+      Height = 13
+      Caption = 'Inicial'
+    end
+    object Label3: TLabel
+      Left = 127
+      Top = 75
+      Width = 6
+      Height = 13
+      Caption = 'a'
+    end
+    object MaskEdit1: TMaskEdit
+      Left = 56
+      Top = 72
+      Width = 65
+      Height = 21
+      EditMask = '!99/99/0000;1;_'
+      MaxLength = 10
+      TabOrder = 0
+      Text = '  /  /    '
+    end
+    object Edit1: TEdit
+      Left = 56
+      Top = 108
+      Width = 121
+      Height = 21
+      TabOrder = 1
+      Text = 'Edit1'
+    end
+    object Edit2: TEdit
+      Left = 224
+      Top = 108
+      Width = 121
+      Height = 21
+      TabOrder = 2
+      Text = 'Edit1'
+    end
+    object Edit3: TEdit
+      Left = 56
+      Top = 144
+      Width = 49
+      Height = 21
+      TabOrder = 3
+      Text = 'Edit3'
+    end
+    object Edit4: TEdit
+      Left = 116
+      Top = 144
+      Width = 204
+      Height = 21
+      TabOrder = 4
+      Text = 'Edit3'
+    end
+    object CheckBox1: TCheckBox
+      Left = 24
+      Top = 24
+      Width = 97
+      Height = 17
+      Caption = 'CheckBox1'
+      TabOrder = 5
+    end
+    object CheckBox2: TCheckBox
+      Left = 120
+      Top = 24
+      Width = 97
+      Height = 17
+      Caption = 'CheckBox1'
+      TabOrder = 6
+    end
+    object CheckBox3: TCheckBox
+      Left = 223
+      Top = 24
+      Width = 97
+      Height = 17
+      Caption = 'CheckBox1'
+      TabOrder = 7
+    end
+    object MaskEdit2: TMaskEdit
+      Left = 139
+      Top = 72
+      Width = 65
+      Height = 21
+      EditMask = '!99/99/0000;1;_'
+      MaxLength = 10
+      TabOrder = 8
+      Text = '  /  /    '
+    end
+    object Edt_ValorInicial: TMaskEdit
+      Left = 240
+      Top = 81
+      Width = 110
+      Height = 21
+      TabOrder = 9
+      Text = ''
+      OnEnter = Edt_ValorInicialEnter
+    end
+  end
+end

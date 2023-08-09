@@ -1,0 +1,126 @@
+unit PagamentosMovimentoDAO;
+
+interface
+uses PagamentosMovimentoDTO, FireDAC.Comp.Client, System.SysUtils;
+
+type
+  TPagamentosMovimentoDAO = class
+  private
+    Qry: TFDQuery;
+    FPagamento: TPagamentosMovimentoDTO;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function Encontrar(Codigo: Integer): TPagamentosMovimentoDTO;
+    function Salvar(Pagamento: TPagamentosMovimentoDTO): Boolean;
+    function Alterar(Pagamento: TPagamentosMovimentoDTO): Boolean;
+  end;
+
+implementation
+
+uses dmConexao,MovimentoDTO;
+
+{ TPagamentosMovimentoDAO }
+
+constructor TPagamentosMovimentoDAO.Create;
+begin
+  Qry := TFDQuery.Create(nil);
+  FPagamento := TPagamentosMovimentoDTO.Create;
+  Qry.Connection := fdmConexao.BANCO;
+end;
+
+destructor TPagamentosMovimentoDAO.Destroy;
+begin
+  Qry.Free;
+  FPagamento.Free;
+  inherited;
+end;
+
+function TPagamentosMovimentoDAO.Encontrar(Codigo: Integer): TPagamentosMovimentoDTO;
+begin
+  Qry.SQL.Clear;
+  Qry.SQL.Add('SELECT * FROM COBRANCAS WHERE PAG_CODIGO = :PAG_CODIGO');
+  Qry.Params.ParamByName('PAG_CODIGO').AsInteger := Codigo;
+  Qry.Open;
+  if Qry.RecordCount > 0 then
+  begin
+    FPagamento.Codigo := Qry.FieldByName('COB_CODIGO').AsInteger;
+    FPagamento.Movimento := Qry.FieldByName('COB_Movimento').AsString;
+    FPagamento.DataVcto := Qry.FieldByName('COB_DATAVCTO').AsDateTime;
+    FPagamento.DataVenda := Qry.FieldByName('COB_DATAVENDA').AsDateTime;
+    FPagamento.NumeroDaParcela := Qry.FieldByName('COB_NUMERODAPARCELA').AsInteger;
+    FPagamento.DataPagto := Qry.FieldByName('COB_DATAPAGTO').AsDateTime;
+    FPagamento.Juros := Qry.FieldByName('COB_JUROS').AsFloat;
+    FPagamento.Multa := Qry.FieldByName('COB_MULTA').AsFloat;
+    FPagamento.Observacoes := Qry.FieldByName('COB_OBSERVACOES').AsString;
+    FPagamento.Valor := Qry.FieldByName('COB_VALOR').AsFloat;
+    Result := FPagamento;
+  end
+  else
+    Result := nil;
+end;
+
+function TPagamentosMovimentoDAO.Salvar(Pagamento: TPagamentosMovimentoDTO): Boolean;
+begin
+  try
+    fdmConexao.BANCO.StartTransaction;
+    Qry.SQL.Clear;
+    Qry.SQL.Add('INSERT INTO COBRANCAS (COB_CODIGO, COB_MOVIMENTO,COB_DATAVENDA, COB_DATAVCTO, '+
+                'COB_NUMERODAPARCELA, COB_JUROS, COB_MULTA, COB_OBSERVACOES,COB_VALOR) VALUES '+
+                '(:COB_CODIGO, :COB_MOVIMENTO, :COB_DATAVENDA, :COB_DATAVCTO, :COB_NUMERODAPARCELA, :COB_JUROS, :COB_MULTA, :COB_OBSERVACOES, :COB_VALOR)');
+
+    Qry.ParamByName('COB_CODIGO').AsString := fdmConexao.retornaCodigoMaximo('COB_codigo','pagamentos');
+    Qry.ParamByName('COB_Movimento').AsString := Pagamento.Movimento;
+    Qry.ParamByName('COB_DATAVENDA').AsDateTime := Date;
+    Qry.ParamByName('COB_DATAVCTO').AsDateTime := Pagamento.DataVcto;
+    Qry.ParamByName('COB_NUMERODAPARCELA').AsInteger := Pagamento.NumeroDaParcela;
+    Qry.ParamByName('COB_JUROS').AsFloat := Pagamento.Juros;
+    Qry.ParamByName('COB_MULTA').AsFloat := Pagamento.Multa;
+    Qry.ParamByName('COB_OBSERVACOES').AsString := Pagamento.Observacoes;
+    Qry.ParamByName('COB_Valor').AsFloat := Pagamento.Valor;
+
+    Qry.ExecSQL;
+    fdmConexao.BANCO.Commit;
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      fdmConexao.BANCO.Rollback;
+      Result := False;
+      raise Exception.Create('Erro ao tentar salvar o registro: '+E.Message);
+    end;
+  end;
+end;
+
+function TPagamentosMovimentoDAO.Alterar(Pagamento: TPagamentosMovimentoDTO): Boolean;
+begin
+  try
+    fdmConexao.BANCO.StartTransaction;
+    Qry.SQL.Clear;
+    Qry.SQL.Add('UPDATE COBRANCAS SET COB_DATAVENDA=:COB_DATAVENDA, COB_DATAVCTO=:COB_DATAVCTO, '+
+                'COB_NUMERODAPARCELA=:COB_NUMERODAPARCELA, COB_DATAPAGTO=:COB_DATAPAGTO, COB_JUROS=:COB_JUROS, '+
+                'COB_MULTA=:COB_MULTA, COB_OBSERVACOES=:COB_OBSERVACOES,COB_VALOR=:COB_Valor WHERE COB_CODIGO=:COB_CODIGO');
+    Qry.ParamByName('COB_CODIGO').AsInteger := Pagamento.Codigo;
+    Qry.ParamByName('COB_DATAVCTO').AsDateTime := Pagamento.DataVcto;
+    Qry.ParamByName('COB_NUMERODAPARCELA').AsInteger := Pagamento.NumeroDaParcela;
+    Qry.ParamByName('COB_DATAPAGTO').AsDateTime := Pagamento.DataPagto;
+    Qry.ParamByName('COB_DATAVENDA').AsDateTime := Pagamento.DataVenda;
+    Qry.ParamByName('COB_JUROS').AsFloat := Pagamento.Juros;
+    Qry.ParamByName('COB_MULTA').AsFloat := Pagamento.Multa;
+    Qry.ParamByName('COB_VALOR').AsFloat := Pagamento.Valor;
+    Qry.ParamByName('COB_OBSERVACOES').AsString := Pagamento.Observacoes;
+    Qry.ExecSQL;
+    fdmConexao.BANCO.Commit;
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      fdmConexao.BANCO.Rollback;
+      Result := False;
+      raise Exception.Create('Erro ao tentar alterar o registro: '+E.Message);
+    end;
+  end;
+end;
+
+end.
+

@@ -1,0 +1,445 @@
+unit Main;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,LicencaDTO, LicencaDAO,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.ExtCtrls,
+  Vcl.StdCtrls,System.DateUtils,uCurrencyEditVCL, Vcl.Buttons;
+
+type
+  TPrincipal = class(TForm)
+    MainMenu1: TMainMenu;
+    Cliente1: TMenuItem;
+    ClienteCadastrar: TMenuItem;
+    ClienteListar: TMenuItem;
+    Produtos1: TMenuItem;
+    ListarProdutos: TMenuItem;
+    CadastrarProdutos: TMenuItem;
+    Vendas1: TMenuItem;
+    VendasVender: TMenuItem;
+    PreVenda: TMenuItem;
+    Servio1: TMenuItem;
+    Cadastrar1: TMenuItem;
+    Cadastrar2: TMenuItem;
+    OrdensdeS1: TMenuItem;
+    Configurar1: TMenuItem;
+    ConfigurarOS: TMenuItem;
+    OrdemdeServio2: TMenuItem;
+    pnlConteudo: TPanel;
+    Locais1: TMenuItem;
+    CidadesListar: TMenuItem;
+    Entregas1: TMenuItem;
+    EntregasListar: TMenuItem;
+    EntregasCadastrar: TMenuItem;
+    Orcamento: TMenuItem;
+    Bairro: TMenuItem;
+    ListarFornecedor: TMenuItem;
+    DadosEmpresa: TMenuItem;
+    FormasdePagamento: TMenuItem;
+    CondicoesPagamento: TMenuItem;
+    Financeiro: TMenuItem;
+    RelatorioVendas: TMenuItem;
+    btnProduto: TSpeedButton;
+    btnVendas: TSpeedButton;
+    btnFinanceiro: TSpeedButton;
+    btnCliente: TSpeedButton;
+    btnVender: TSpeedButton;
+    pnlHeader: TPanel;
+    Contasareceber: TMenuItem;
+    Contasapagar: TMenuItem;
+    Button1: TButton;
+    Categorias1: TMenuItem;
+    procedure ClienteListarClick(Sender: TObject);
+    procedure ClienteCadastrarClick(Sender: TObject);
+    procedure CidadesListarClick(Sender: TObject);
+    procedure BairroClick(Sender: TObject);
+    procedure ListarFornecedorClick(Sender: TObject);
+    procedure ListarProdutosClick(Sender: TObject);
+    procedure CadastrarProdutosClick(Sender: TObject);
+    procedure VendasVenderClick(Sender: TObject);
+    procedure PreVendaClick(Sender: TObject);
+    procedure OrcamentoClick(Sender: TObject);
+    procedure DadosEmpresaClick(Sender: TObject);
+    procedure OrdemdeServio2Click(Sender: TObject);
+    procedure FormasdePagamentoClick(Sender: TObject);
+    procedure CondicoesPagamentoClick(Sender: TObject);
+    procedure RelatorioVendasClick(Sender: TObject);
+    procedure btnProdutoClick(Sender: TObject);
+    procedure btnVendasClick(Sender: TObject);
+    procedure btnFinanceiroClick(Sender: TObject);
+    procedure btnClienteClick(Sender: TObject);
+    procedure btnVenderClick(Sender: TObject);
+    procedure ContasareceberClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure FormCreate(Sender:TObject);
+    function ConferirChave(Chave: string): Boolean;
+    procedure Categorias1Click(Sender: TObject);
+   private
+    { Private declarations }
+
+  public
+    { Public declarations }
+    Licenca    : TLicencaDTO;
+    LicencaDAO : TLicencaDAO;
+    destructor destroy;Override;
+  end;
+
+var
+  Principal: TPrincipal;
+
+implementation
+
+{$R *.dfm}
+
+uses uPesBairro, uPesCliente, uPesMunicipio, uPesVenda, uCadCliente,
+  uCadMunicipio, ClienteDAO, uPesFornecedores, uPesProduto, uCadProduto,
+  uCadMovimento, uCadEmpresa, dmConexao, uConfigVenda, uCadFormaPagamento,
+  uPesFormPagto, uPesCondicoes, uPesRelatorio, uPesVencimentos,uCadLicenca,
+  uPesCategorias;
+
+procedure TPrincipal.BairroClick(Sender: TObject);
+begin
+  try
+    FrmPesBairro := TFrmPesBairro.Create(self);
+    FrmPesBairro.ShowModal;
+
+  finally
+    FrmPesBairro.Free;
+  end;
+end;
+
+procedure TPrincipal.btnProdutoClick(Sender: TObject);
+begin
+  try
+    FrmPesProduto := TFrmPesProduto.Create(Self);
+    FrmPesProduto.ShowModal;
+  finally
+    FrmPesProduto.Free;
+  end;
+end;
+
+procedure TPrincipal.CadastrarProdutosClick(Sender: TObject);
+begin
+  try
+    FrmCadProduto := TFrmCadProduto.Create(Self,1);
+    FrmCadProduto.ShowModal;
+  finally
+    FrmCadProduto.Free;
+  end;
+end;
+
+procedure TPrincipal.Categorias1Click(Sender: TObject);
+begin
+  Try
+    FrmPesCategoria := TFrmPesCategoria.Create(Self);
+    FrmPesCategoria.ShowModal;
+  Finally
+    FrmPesCategoria.Free;
+  End;
+end;
+
+procedure TPrincipal.CidadesListarClick(Sender: TObject);
+begin
+  try
+    FrmPesMunicipio := TFrmPesMunicipio.create(Self);
+    FrmPesMunicipio.ShowModal;
+  finally
+    FrmPesMunicipio.Free;
+  end;
+end;
+
+procedure TPrincipal.ClienteCadastrarClick(Sender: TObject);
+begin
+  try
+    FrmCadCliente := TFrmCadCLiente.Create(Self,1);
+    FrmCadCliente.ShowModal;
+  finally
+    FrmCadCliente.Free;
+  end;
+end;
+
+procedure TPrincipal.ClienteListarClick(Sender: TObject);
+begin
+
+  try
+    FrmPesCliente := TFrmPesCliente.Create(Self);
+    FrmPesCliente.FStatus := 1;
+    FrmPesCliente.ShowModal;
+
+  finally
+    FrmPesCliente.Free;
+
+  end;
+end;
+
+procedure TPrincipal.CondicoesPagamentoClick(Sender: TObject);
+begin
+  try
+    FrmPesCondicoes := TFrmPesCondicoes.Create(Self);
+    FrmPesCondicoes.ShowModal;
+  finally
+    FrmPesCondicoes.Free;
+  end;
+end;
+
+procedure TPrincipal.ContasareceberClick(Sender: TObject);
+begin
+  Try
+    FrmPesVencimentos := TFrmPesVencimentos.Create(Self);
+    FrmPesVencimentos.ShowModal;
+  Finally
+    FrmPesVencimentos.Free;
+  End;
+end;
+
+procedure TPrincipal.DadosEmpresaClick(Sender: TObject);
+begin
+  try
+    FrmCadEmpresa := TFrmCadEmpresa.Create(self);
+    FrmCadEmpresa.ShowModal;
+  finally
+    FrmCadEmpresa.Free;
+  end;
+end;
+
+destructor TPrincipal.destroy;
+begin
+  inherited;
+end;
+
+procedure TPrincipal.FormasdePagamentoClick(Sender: TObject);
+begin
+  try
+    FrmPesFormaPagamento := TFrmPesFormaPagamento.create(Self);
+    FrmPesFormaPagamento.ShowModal;
+  finally
+    FrmPesFormaPagamento.Free;
+  end;
+
+end;
+
+function TPrincipal.ConferirChave(Chave: string): Boolean;
+var
+  Ano, Mes, Dia: Integer;
+  Guid: string;
+begin
+  Result := False;
+
+  // Confira o comprimento da chave (deve ser o comprimento de uma data em formato YYYYMMDD + 38, que é o comprimento de um GUID)
+  if Length(Chave) <> (8 + 38) then
+    Exit;
+
+  // Confira a data
+  Ano := StrToIntDef(Copy(Chave, 1, 4), 0);
+  Mes := StrToIntDef(Copy(Chave, 5, 2), 0);
+  Dia := StrToIntDef(Copy(Chave, 7, 2), 0);
+  if (Ano < 1) or (Ano > 9999) or (Mes < 1) or (Mes > 12) or (Dia < 1) or (Dia > 31) then
+    Exit;
+
+  // Confira o GUID
+  //Guid := Copy(Chave, 9, 38);
+  //if not IsGuid(Guid) then  // Aqui você precisaria de uma função IsGuid que confira se uma string está no formato de um GUID.
+  // Exit;
+
+  // Se chegamos até aqui, a chave está no formato correto
+  Result := True;
+end;
+procedure TPrincipal.FormCreate(Sender: TObject);
+var
+  Licenca : TLicencaDTO;
+
+  function Checar(Licenca:TLicencaDTO):Boolean;
+  begin
+    if (Licenca = nil) or (Licenca.DataExpiracao < Now) then
+    begin
+      ShowMessage('Licença inválida ou expirada!');
+      result := false;
+    end
+    else
+      result := true;
+  end;
+
+begin
+  fdmConexao := TfdmConexao.Create(Self);
+  LicencaDAO := TLicencaDAO.Create;
+  Licenca := TLicencaDTO.Create;
+
+  Licenca := LicencaDAO.ObterChaveArmazenada;
+
+  while (Licenca.Chave = '') or not Checar(Licenca) do
+  begin
+    FrmLicenca := TFrmLicenca.Create(nil,Licenca);
+
+
+    try
+      if FrmLicenca.ShowModal = mrOk then
+      begin
+        ConferirChave(Licenca.Chave);
+        Licenca := FrmLicenca.Licen;
+
+        // Se a chave fornecida pelo usuário for válida, salve-a no banco de dados e encerre o loop.
+        if Checar(Licenca) then
+        begin
+          LicencaDAO.Salvar(Licenca);
+          Break;
+        end
+        else
+          ShowMessage('A chave fornecida é inválida. Por favor, tente novamente.');
+      end
+      else
+      begin
+        // Se o usuário cancelar o formulário de licença, feche o aplicativo.
+        Application.Terminate;
+        Exit;
+      end;
+    finally
+      FrmLicenca.Free;
+    end;
+  end;
+end;
+
+procedure TPrincipal.FormShow(Sender: TObject);
+
+begin
+  LicencaDAO := TLicencaDAO.Create;
+  {try
+    Licenca := LicencaDAO.GetLicenca(Chave);
+    if (Licenca = nil) or (Licenca.DataExpiracao < Now) then
+    begin
+      ShowMessage('Licença inválida ou expirada!');
+      Application.Terminate;
+    end;
+  finally }
+    LicencaDAO.Free;
+ // end;
+end;
+
+
+procedure TPrincipal.ListarFornecedorClick(Sender: TObject);
+begin
+  try
+    FrmPesFornecedor := TFrmPesFornecedor.Create(Self);
+    FrmPesFornecedor.ShowModal;
+  finally
+    FrmPesFornecedor.Free;
+  end;
+end;
+
+procedure TPrincipal.ListarProdutosClick(Sender: TObject);
+begin
+  try
+    FrmPesProduto := TFrmPesProduto.Create(Self);
+    FrmPesProduto.ShowModal;
+  finally
+    FrmPesProduto.Free;
+  end;
+end;
+
+procedure TPrincipal.OrcamentoClick(Sender: TObject);
+begin
+  try
+    FrmCadMovimento := TFrmCadMovimento.Create(Self,3);
+    FrmCadMovimento.ShowModal;
+  finally
+    FrmCadMovimento.free;
+  end;
+end;
+
+procedure TPrincipal.OrdemdeServio2Click(Sender: TObject);
+begin
+  try
+    FrmConfigVenda := TFrmConfigVenda.Create(Self,'1');
+    FrmConfigVenda.ShowModal;
+  finally
+    FrmConfigVenda.Free;
+  end;
+end;
+
+procedure TPrincipal.PreVendaClick(Sender: TObject);
+begin
+  try
+    FrmCadMovimento := TFrmCadMovimento.Create(Self,2);
+    FrmCadMovimento.ShowModal;
+  finally
+    FrmCadMovimento.free;
+  end;
+end;
+
+procedure TPrincipal.RelatorioVendasClick(Sender: TObject);
+begin
+  try
+    FrmPesRelatorio := TFrmPesRelatorio.Create(self);
+    FrmPesRelatorio.ShowModal;
+  finally
+    FrmPesRelatorio.Free;
+  end;
+end;
+
+procedure TPrincipal.btnVendasClick(Sender: TObject);
+begin
+  try
+    FrmPesVenda := TFrmPesVenda.Create(Self);
+    FrmPesVenda.ShowModal;
+  finally
+    FrmPesVenda.Free;
+  end;
+end;
+
+procedure TPrincipal.btnFinanceiroClick(Sender: TObject);
+begin
+  Try
+    FrmPesRelatorio := TFrmPesRelatorio.Create(Self);
+    FrmPesRelatorio.ShowModal;
+  Finally
+    FrmPesRelatorio.Free;
+  End;
+end;
+
+procedure TPrincipal.btnClienteClick(Sender: TObject);
+begin
+  Try
+    FrmPesCliente := TFrmPesCliente.create(Self);
+    FrmPesCliente.ShowModal;
+  Finally
+    FrmPesCliente.Free;
+  End;
+end;
+
+procedure TPrincipal.btnVenderClick(Sender: TObject);
+begin
+  Try
+    FrmCadMovimento := TFrmCadMovimento.create(Self,1);
+    FrmCadMovimento.ShowModal;
+  Finally
+    FrmCadMovimento.Free;
+  End;
+end;
+
+procedure TPrincipal.Button1Click(Sender: TObject);
+function GerarChave: string;
+var
+  Guid: TGuid;
+  DataAtual: TDateTime;
+begin
+  DataAtual := Now;
+  CreateGUID(Guid);
+  Result := IntToStr(YearOf(DataAtual)) + IntToStr(MonthOf(DataAtual)) + IntToStr(DayOf(DataAtual)) + GUIDToString(Guid);
+end;
+begin
+  ShowMessage(GerarChave);
+end;
+
+procedure TPrincipal.VendasVenderClick(Sender: TObject);
+begin
+  try
+    FrmCadMovimento := TFrmCadMovimento.Create(Self,1);
+    FrmCadMovimento.ShowModal;
+  finally
+    FrmCadMovimento.free;
+  end;
+end;
+
+end.

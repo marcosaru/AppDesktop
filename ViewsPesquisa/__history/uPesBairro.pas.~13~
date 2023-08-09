@@ -1,0 +1,176 @@
+unit uPesBairro;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client;
+
+type
+  TFrmPesBairro = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnCadastrar: TButton;
+    btnAlterar: TButton;
+    btnApresentar: TButton;
+    btnCancelar: TButton;
+    DBGrid1: TDBGrid;
+    DtsBairro: TDataSource;
+    QryPesquisa: TFDQuery;
+    QryPesquisaBAI_NOME: TStringField;
+    QryPesquisaBAI_CODIGO: TIntegerField;
+    QryPesquisaMUN_NOME: TStringField;
+    QryPesquisaEST_NOME: TStringField;
+    QryPesquisaMUN_CODIGO: TIntegerField;
+    QryPesquisaEST_CODIGO: TIntegerField;
+    btnBuscar: TButton;
+    pnlBuscar: TPanel;
+    Edt_Bairro: TEdit;
+    Edt_Municipio: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    procedure btnCadastrarClick(Sender: TObject);
+    procedure DBGrid1DblClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure carrega(ordenacao:String = '');
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure btnAlterarClick(Sender: TObject);
+    procedure btnApresentarClick(Sender: TObject);
+    procedure Edt_BairroKeyPress(Sender: TObject; var Key: Char);
+    procedure btnBuscarClick(Sender: TObject);
+    procedure Edt_MunicipioKeyPress(Sender: TObject; var Key: Char);
+    procedure pnlBuscarExit(Sender: TObject);
+    procedure pnlBotoesClick(Sender: TObject);
+    procedure DBGrid1TitleClick(Column: TColumn);
+  private
+    { Private declarations }
+    ordem:boolean;
+    procedure AbrirCadastro(AStatus:Integer);
+  public
+    { Public declarations }
+    FStatus : integer;
+  end;
+
+var
+  FrmPesBairro: TFrmPesBairro;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao,uCadBairro;
+
+procedure TFrmPesBairro.AbrirCadastro(AStatus: Integer);
+begin
+   try
+    FrmCadBairro := TFrmCadBairro.Create(self,AStatus);
+    FrmCadBairro.ShowModal;
+  finally
+    FrmCadBairro.Free;
+    carrega;
+  end;
+end;
+
+procedure TFrmPesBairro.btnCadastrarClick(Sender: TObject);
+begin
+  AbrirCadastro(1);
+end;
+
+procedure TFrmPesBairro.btnAlterarClick(Sender: TObject);
+begin
+  AbrirCadastro(2);
+end;
+
+procedure TFrmPesBairro.btnApresentarClick(Sender: TObject);
+begin
+  AbrirCadastro(3);
+end;
+
+procedure TFrmPesBairro.btnBuscarClick(Sender: TObject);
+begin
+  pnlBuscar.Visible := true;
+  Edt_Bairro.SetFocus;
+end;
+
+procedure TFrmPesBairro.carrega(ordenacao:String = '');
+begin
+  Qrypesquisa.SQl.Clear;
+  qrypesquisa.sql.add('select bai_codigo,bai_nome,mun_nome,est_nome,mun_codigo,est_nome,est_codigo from bairro '+
+                      'join municipio '+
+                      'on mun_codigo = bai_municipio '+
+                      'join estado                   '+
+                      'on mun_estado = est_codigo ');
+  if Trim(Ordenacao) <> '' then
+    QryPesquisa.SQL.Add('order by '+ordenacao)
+  else
+    QryPesquisa.SQL.Add('order by mun_nome ');
+
+  qrypesquisa.open;
+end;
+
+procedure TFrmPesBairro.DBGrid1DblClick(Sender: TObject);
+begin
+  pnlBuscar.Visible := false;
+  ModalResult := MrOk;
+end;
+
+procedure TFrmPesBairro.DBGrid1TitleClick(Column: TColumn);
+var
+  ordenacao: string;
+begin
+  if not Assigned(Column.Field) then Exit;
+
+  if Column.FieldName = 'bai_nome' then
+  begin
+    ordenacao := ' bai_nom';
+    if ordem then
+      ordenacao := ordenacao + 'ASC'
+    else
+      ordenacao:= ordenacao + ' DESC'
+  end;
+end;
+
+procedure TFrmPesBairro.Edt_BairroKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key = #13) and (Edt_Bairro.Text <> '') then
+  begin
+    QryPesquisa.Locate('Bai_Nome',Edt_Bairro.Text,[loPartialKey,loCaseInsensitive]);
+  end;
+end;
+
+procedure TFrmPesBairro.Edt_MunicipioKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key = #13) and (Edt_Municipio.Text <> '') then
+  begin
+    QryPesquisa.Locate('MUN_NOME',Edt_Municipio.Text,[loPartialKey,loCaseInsensitive]);
+  end;
+end;
+
+procedure TFrmPesBairro.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if key = VK_ESCAPE then
+    btnCancelar.Click();
+end;
+
+procedure TFrmPesBairro.FormShow(Sender: TObject);
+begin
+  ordem := false;
+  carrega;
+end;
+
+procedure TFrmPesBairro.pnlBotoesClick(Sender: TObject);
+begin
+  pnlBuscar.Visible := false;
+end;
+
+procedure TFrmPesBairro.pnlBuscarExit(Sender: TObject);
+begin
+  pnlBuscar.Visible := false;
+end;
+
+end.

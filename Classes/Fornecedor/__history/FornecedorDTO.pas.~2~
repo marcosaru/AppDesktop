@@ -1,0 +1,10 @@
+unit FornecedorDTO;
+
+interface
+  TFornecedorDTO = class
+
+  end;
+
+implementation
+
+end.

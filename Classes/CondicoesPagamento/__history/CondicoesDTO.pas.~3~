@@ -1,0 +1,30 @@
+unit CondicoesDTO;
+
+interface
+  type
+    TCondicoesDTO = class
+      private
+        FCodigo: Integer;
+        FDataVenda: TDate;
+        FDataVcto: TDate;
+        FMovimento: Integer;
+        FNumeroDaParcela: Integer;
+        FDataPagto: TDate;
+        FJuros: Double;
+        FMulta: Double;
+        FObservacoes: string;
+      public
+        property Codigo : Integer read FCodigo write FCodigo;
+        property DataVenda : TDate read FDataVenda write FDataVenda;
+        property DataVcto : TDate read FDataVcto write FDataVcto;
+        property Movimento : Integer read FMovimento write FMovimento;
+        property NumeroDaParcela : Integer read FNumeroDaParcela write FNumeroDaParcela;
+        property DataPagto : TDate read FDataPagto write FDataPagto;
+        property Juros : Double read FJuros write FJuros;
+        property Multa : Double read FMulta write FMulta;
+        property Observacoes : String read FObservacoes write FObservacoes;
+    end;
+
+implementation
+
+end.

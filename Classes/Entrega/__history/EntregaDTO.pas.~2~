@@ -1,0 +1,23 @@
+unit EntregaDTO;
+
+interface
+  type
+    TEntregaDTO = class
+      private
+        FCodigo: String;
+        FMovimento: String;
+        FDataPrev : TDate;
+        FData : TDate;
+        FEntregador: String;
+      public
+        property Codigo:String read fCodigo write Fcodigo;
+        property Codigo:String read fCodigo write Fcodigo;
+        property Codigo:String read fCodigo write Fcodigo;
+        property Codigo:String read fCodigo write Fcodigo;
+        property Codigo:String read fCodigo write Fcodigo;
+    end;
+
+
+implementation
+
+end.

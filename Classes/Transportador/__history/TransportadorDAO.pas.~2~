@@ -1,0 +1,17 @@
+unit TransportadorDAO;
+
+interface
+uses
+  TransportadorDTO;
+    type
+      TTransportadorDAO = class
+        private
+
+
+        public
+
+      end;
+
+implementation
+
+end.

@@ -1,0 +1,75 @@
+unit uConfigVenda;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+
+type
+  TFrmConfigVenda = class(TForm)
+    Edt_ObservacoesVenda: TMemo;
+    Label1: TLabel;
+    Label2: TLabel;
+    Edt_ObservacoesPreV: TMemo;
+    Label3: TLabel;
+    Edt_ObservacoesOrcamento: TMemo;
+    btnConfirmar: TButton;
+    btnCancelar: TButton;
+    procedure btnConfirmarClick(Sender: TObject);
+  private
+    { Private declarations }
+    QryCadastro : TFDQuery;
+    EmpresaCodigo: String;
+  public
+    { Public declarations }
+    constructor create(AOwner:TComponent;ACodigo:string);
+  end;
+
+var
+  FrmConfigVenda: TFrmConfigVenda;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao;
+
+procedure TFrmConfigVenda.btnConfirmarClick(Sender: TObject);
+begin
+  try
+    QryCadastro := TFDQuery.Create(nil);
+    QryCadastro.Connection := fdmConexao.BANCO;
+
+    if fdmConexao.BANCO.InTransaction then
+      fdmConexao.BANCO.Rollback;
+
+    fdmConexao.BANCO.StartTransaction;
+
+    QryCadastro.SQL.Clear;
+    QryCadastro.SQL.Add('insert into configuracoes ( '+
+                        'conf_mov_observacoes_venda,conf_mov_observacoes_prev, '+
+                        'conf_mov_observacoes_orcamento)values ( ' +
+                        ':conf_mov_observacoes_venda,:conf_mov_observacoes_prev, '+
+                        ':conf_mov_observacoes_orcamento)');
+
+    QryCadastro.Params[0].AsString := Edt_ObservacoesVenda.Text;
+    QryCadastro.Params[1].AsString := Edt_ObservacoesPreV.Text;
+    QryCadastro.Params[2].AsString := Edt_Observacoesorcamento.Text;
+
+    QryCadastro.ExecSQL;
+    fdmConexao.BANCO.Commit;
+  finally
+    QryCadastro.Free;
+  end;
+end;
+
+constructor TFrmConfigVenda.create(AOwner: TComponent; ACodigo: string);
+begin
+  inherited create(AOwner);
+  EmpresaCodigo: ACodigo;
+end;
+
+end.

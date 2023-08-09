@@ -1,0 +1,310 @@
+object FrmPesVencimentos: TFrmPesVencimentos
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'Contas a receber'
+  ClientHeight = 471
+  ClientWidth = 972
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnKeyPress = FormKeyPress
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pnlMain: TPanel
+    Left = 0
+    Top = 0
+    Width = 868
+    Height = 471
+    Align = alClient
+    TabOrder = 0
+    object Label1: TLabel
+      Left = 694
+      Top = 403
+      Width = 81
+      Height = 13
+      Caption = 'Valor Total Anual'
+    end
+    object Label2: TLabel
+      Left = 701
+      Top = 430
+      Width = 74
+      Height = 13
+      Caption = 'Valor Mes Atual'
+    end
+    object Label3: TLabel
+      Left = 27
+      Top = 430
+      Width = 19
+      Height = 13
+      Caption = 'M'#234's'
+    end
+    object Label4: TLabel
+      Left = 18
+      Top = 402
+      Width = 33
+      Height = 13
+      Caption = 'Cliente'
+    end
+    object Grid: TDBGrid
+      Left = -5
+      Top = 0
+      Width = 872
+      Height = 376
+      DataSource = DtsVencimentos
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
+      TabOrder = 0
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -11
+      TitleFont.Name = 'Tahoma'
+      TitleFont.Style = []
+      OnDrawColumnCell = GridDrawColumnCell
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'PAG_MOVIMENTO'
+          Title.Caption = 'Venda'
+          Width = 44
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'CLI_NOME'
+          Title.Caption = 'Cliente'
+          Width = 180
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'PAG_DATAVENDA'
+          Title.Caption = 'Venda'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'PAG_DATAVCTO'
+          Title.Caption = 'Vencimento'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'PAG_NUMERODAPARCELA'
+          Title.Caption = 'Parcela'
+          Width = 49
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'PAG_JUROS'
+          Title.Caption = 'Juros'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'PAG_MULTA'
+          Title.Caption = 'Multa'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'PAG_OBSERVACOES'
+          Title.Caption = 'Obs'
+          Width = 173
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'PAG_VALOR'
+          Title.Caption = 'Valor'
+          Visible = True
+        end>
+    end
+    object Edt_ValorTotal: TCurrencyEdit
+      Left = 781
+      Top = 400
+      Width = 81
+      Height = 21
+      Alignment = taRightJustify
+      Enabled = False
+      TabOrder = 1
+      Text = '0,00'
+      FormatMask = '###,##0.00'
+    end
+    object Edt_ValorMes: TCurrencyEdit
+      Left = 781
+      Top = 427
+      Width = 81
+      Height = 21
+      Alignment = taRightJustify
+      Enabled = False
+      TabOrder = 2
+      Text = '0,00'
+      FormatMask = '###,##0.00'
+    end
+    object CbbMes: TComboBox
+      Left = 57
+      Top = 427
+      Width = 105
+      Height = 21
+      TabOrder = 3
+      Items.Strings = (
+        'Janeiro'
+        'Fevereiro'
+        'Mar'#231'o'#11
+        'Abril'
+        'Maio'
+        'Junho'
+        'Julho'
+        'Agosto'
+        'Setembro'
+        'Outubro'
+        'Novembro'
+        'Dezembro')
+    end
+    object btnBuscar: TButton
+      Left = 184
+      Top = 427
+      Width = 65
+      Height = 21
+      Caption = 'Buscar'
+      TabOrder = 4
+      OnClick = btnBuscarClick
+    end
+    object Edt_CodigoCliente: TEdit
+      Left = 57
+      Top = 400
+      Width = 48
+      Height = 21
+      TabOrder = 5
+    end
+    object Edt_Cliente: TEdit
+      Left = 111
+      Top = 400
+      Width = 138
+      Height = 21
+      TabOrder = 6
+    end
+    object btnBuscarCliente: TButton
+      Left = 232
+      Top = 400
+      Width = 17
+      Height = 21
+      Caption = '...'
+      TabOrder = 7
+      OnClick = btnBuscarClienteClick
+    end
+  end
+  object pnlBotoes: TPanel
+    Left = 868
+    Top = 0
+    Width = 104
+    Height = 471
+    Align = alRight
+    BevelOuter = bvNone
+    TabOrder = 1
+    object btnReceber: TButton
+      Left = 16
+      Top = 55
+      Width = 75
+      Height = 25
+      Caption = 'Receber'
+      TabOrder = 0
+      OnClick = btnReceberClick
+    end
+    object btnApresentar: TButton
+      Left = 16
+      Top = 86
+      Width = 75
+      Height = 25
+      Caption = 'Apresentar'
+      TabOrder = 1
+    end
+    object btnCancelar: TButton
+      Left = 16
+      Top = 117
+      Width = 75
+      Height = 25
+      Caption = 'Cancelar'
+      TabOrder = 2
+      OnClick = btnCancelarClick
+    end
+  end
+  object DtsVencimentos: TDataSource
+    DataSet = QryPesquisa
+    Left = 912
+    Top = 352
+  end
+  object QryPesquisa: TFDQuery
+    Connection = fdmConexao.BANCO
+    SQL.Strings = (
+      
+        'select pag_codigo,pag_movimento,cli_nome,pag_datavenda,pag_datav' +
+        'cto,pag_numerodaparcela,pag_juros,Pag_multa,pag_observacoes,pag_' +
+        'valor '
+      'from pagamentos'
+      'join movimento on pag_movimento = mov_codigo'
+      'join cliente on mov_cliente = cli_codigo'
+      'where (EXTRACT(MONTH FROM pag_datavcto)) = 6;')
+    Left = 888
+    Top = 352
+    object QryPesquisaPAG_MOVIMENTO: TIntegerField
+      FieldName = 'PAG_MOVIMENTO'
+      Origin = 'PAG_MOVIMENTO'
+    end
+    object QryPesquisaPAG_DATAVENDA: TDateField
+      FieldName = 'PAG_DATAVENDA'
+      Origin = 'PAG_DATAVENDA'
+    end
+    object QryPesquisaPAG_DATAVCTO: TDateField
+      FieldName = 'PAG_DATAVCTO'
+      Origin = 'PAG_DATAVCTO'
+    end
+    object QryPesquisaPAG_NUMERODAPARCELA: TIntegerField
+      FieldName = 'PAG_NUMERODAPARCELA'
+      Origin = 'PAG_NUMERODAPARCELA'
+    end
+    object QryPesquisaPAG_JUROS: TIntegerField
+      FieldName = 'PAG_JUROS'
+      Origin = 'PAG_JUROS'
+      DisplayFormat = 'R$ 0.00'
+    end
+    object QryPesquisaPAG_MULTA: TIntegerField
+      FieldName = 'PAG_MULTA'
+      Origin = 'PAG_MULTA'
+      DisplayFormat = 'R$ 0.00'
+    end
+    object QryPesquisaPAG_OBSERVACOES: TStringField
+      FieldName = 'PAG_OBSERVACOES'
+      Origin = 'PAG_OBSERVACOES'
+      Size = 255
+    end
+    object QryPesquisaPAG_VALOR: TSingleField
+      FieldName = 'PAG_VALOR'
+      Origin = 'PAG_VALOR'
+      DisplayFormat = 'R$ 0.00'
+    end
+    object QryPesquisaCLI_NOME: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'CLI_NOME'
+      Origin = 'CLI_NOME'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 255
+    end
+    object QryPesquisaPAG_CODIGO: TIntegerField
+      FieldName = 'PAG_CODIGO'
+      Origin = 'PAG_CODIGO'
+      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
+      Required = True
+    end
+  end
+end

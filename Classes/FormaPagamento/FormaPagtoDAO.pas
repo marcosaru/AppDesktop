@@ -1,0 +1,100 @@
+unit FormaPagtoDAO;
+
+interface
+uses FormaPagtoDTO,FireDAC.Stan.Intf, FireDAC.Stan.Option,System.Sysutils,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+  type
+    TFormaPagtoDAO = class
+      private
+        QryPesquisa : TFDQuery;
+        QryCadastro : TFDQuery;
+        QryAux      : TFDQuery;
+        FormaPagto  : TFormaPagtoDTO;
+        FStatus     : integer;
+      public
+        constructor create;
+        destructor destroy;override;
+        function Encontrar(ACodigo:string):TFormaPagtoDTO;
+        function salvar(FormaPagto:TFormaPagtoDTO):boolean;
+        function Alterar(FormaPagto:TFormaPagtoDTO):Boolean;
+
+    end;
+
+implementation
+
+{ TFormaPagtoDAO }
+
+uses dmConexao;
+
+function TFormaPagtoDAO.Alterar(FormaPagto: TFormaPagtoDTO): Boolean;
+begin
+  FStatus := 2;
+  salvar(FormaPagto);
+end;
+
+constructor TFormaPagtoDAO.create;
+begin
+  QryPesquisa := TFDQuery.Create(nil);
+  QryCadastro := TFDQuery.Create(nil);
+  QryAux      := TFDQuery.Create(nil);
+  FormaPagto  := TFormaPagtoDTO.Create;
+
+  QryPesquisa.Connection := fdmConexao.BANCO;
+  QryCadastro.Connection := fdmConexao.BANCO;
+  QryAux.Connection      := fdmConexao.BANCO;
+end;
+
+destructor TFormaPagtoDAO.destroy;
+begin
+  FreeAndNil(QryPesquisa);
+  FreeAndNil(QryCadastro);
+  FreeAndNil(QryAux);
+  FreeAndNil(FormaPagto);
+
+  inherited;
+end;
+
+function TFormaPagtoDAO.Encontrar(ACodigo: string): TFormaPagtoDTO;
+begin
+  QryPesquisa.SQL.Clear;
+  QryPesquisa.SQL.Add('SELECT * FROM FORMAPAGTO where FORPAGTO_CODIGO = '+Acodigo);
+  QryPesquisa.Open;
+  if QryPesquisa.RecordCount > 0 then
+  begin
+    FormaPagto.Codigo := QryPesquisa.FieldByName('FORPAGTO_CODIGO').AsString;
+    FormaPagto.Descricao := QryPesquisa.FieldByName('FORPAGTO_DESCRICAO').AsString;
+    FormaPagto.Avista :=  QryPesquisa.FieldByName('FORPAGTO_Avista').AsiNTEGER;
+
+    result := FormaPagto.Clone(FormaPagto);
+  end
+  else result := nil;
+end;
+
+function TFormaPagtoDAO.salvar(FormaPagto: TFormaPagtoDTO): boolean;
+begin
+  if fdmConexao.BANCO.InTransaction then
+    fdmConexao.BANCO.Rollback;
+
+  fdmConexao.BANCO.StartTransaction;
+
+  QryCadastro.SQL.Clear;
+  if FStatus in [0,1] then
+    QryCadastro.SQL.Add('insert into formapagto (FORPAGTO_CODIGO, '+
+                      'FORPAGTO_DESCRICAO,FORPAGTO_Avista) values (:FORPAGTO_CODIGO,'+
+                      ':FORPAGTO_DESCRICAO,:FORPAGTO_Avista )')
+  else
+  if FStatus = 2 then
+    QryCadastro.SQL.Add('UPDATE FORMAPAGTO SET FORPAGTO_Avista=:FORPAGTO_Avista,'+
+                        'FORPAGTO_DESCRICAO=:FORPAGTO_DESCRICAO where FORPAGTO_CODIGO = '+FormaPagto.Codigo);
+
+  QryCadastro.ParamByName('FORPAGTO_CODIGO').AsString := FormaPagto.Codigo;
+  QryCadastro.ParamByName('FORPAGTO_DESCRICAO').AsString := FormaPagto.Descricao;
+  QryCadastro.ParamByName('FORPAGTO_Avista').AsInteger := FormaPagto.Avista;
+  QryCadastro.ExecSQL;
+
+  fdmConexao.BANCO.Commit;
+end;
+
+end.

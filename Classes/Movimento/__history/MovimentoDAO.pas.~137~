@@ -1,0 +1,232 @@
+unit MovimentoDAO;
+
+interface
+uses MovimentoDTO,ClienteDTO,ClienteDAO,FireDAC.Stan.Intf, FireDAC.Stan.Option,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,FormaPagtoDTO,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client,ProdutoDTO,ProdutoDAO,
+    PagamentoDTO,
+    CondicoesDAO,FormaPagtoDAO,PagamentosMovimentoDAO,PagamentosMovimentoDTO;
+  type
+    TMovimentoDAO = class
+      public
+        function salvar(Movimento:TMovimentoDTO):Boolean;
+        function encontrar(ACodigo:string): TMovimentoDTO;
+        function alterar(Movimento:TMovimentoDTO):Boolean;
+        constructor create;
+        destructor destroy;
+      private
+        FStatus : integer;
+        QryPesquisa,QryAuxiliar,QryCadastrar: TFDQuery;
+        ClienteDAO : TClienteDAO;
+        ParcelasDAO : TPagamentosMovimentoDAO;
+
+
+        Descricao: TPagamentoDTO;
+        FormaPagto   : TFormaPagtoDAO;
+        Formapgto    : TFormapagtoDTO;
+        Condicoes : TCondicoesDAO;
+        Movimento  : TMovimentoDTO;
+    end;
+
+implementation
+
+{ TMovimentoDAO }
+
+uses dmConexao,System.SysUtils,ProdutoVenda,PagamentoAbstrato;
+
+function TMovimentoDAO.alterar(Movimento: TMovimentoDTO): Boolean;
+begin
+  FStatus := 2;
+  salvar(Movimento);
+end;
+
+constructor TMovimentoDAO.create;
+begin
+  QryPesquisa  := TFDQuery.Create(nil);
+  QryAuxiliar  := TFDQuery.Create(nil);
+  QryCadastrar := TFDQuery.Create(nil);
+
+  QryPesquisa.Connection := fdmConexao.BANCO;
+  QryAuxiliar.Connection := fdmConexao.BANCO;
+  QryCadastrar.Connection := fdmConexao.BANCO;
+  Movimento    := TMovimentoDTO.Create;
+
+  Descricao := TPagamentoDTO.Create;
+  ClienteDAO   := TClienteDAO.create;
+  FormaPagto   := TFormaPagtoDAO.Create;
+  Condicoes    := TCondicoesDAO.Create;
+  ParcelasDAO := TPagamentosMovimentoDAO.Create;
+end;
+
+destructor TMovimentoDAO.destroy;
+begin
+
+  FreeAndNil(QryPesquisa);
+  FreeAndNil(QryAuxiliar);
+
+  FreeAndNil(ClienteDAO);
+  FreeAndNil(Condicoes);
+  FreeAndNil(FormaPagto);
+  FreeAndNil(Movimento);
+  FreeAndNil(Descricao);
+  FreeAndNil(ParcelasDAO);
+   inherited;
+end;
+
+
+function TMovimentoDAO.encontrar(ACodigo: string): TMovimentoDTO;
+begin
+  QryPesquisa.SQL.clear;
+  QryPesquisa.SQL.Add('select * from movimento where mov_codigo = '+ACodigo);
+  QryPesquisa.Open;
+
+  if QryPesquisa.RecordCount > 0 then
+  begin
+    with QryPesquisa do
+    begin
+      Movimento.Codigo := FieldByName('Mov_Codigo').AsString;
+      Movimento.Cliente := ClienteDAO.encontrarCliente(FieldByName('Mov_cliente').AsString);
+      Movimento.Data := Now;
+      Movimento.Tipo := FieldByName('Mov_Tipo').AsString;
+      Movimento.TotalProdutos := FieldByName('Mov_TotalProdutos').AsFloat;
+      Movimento.TotalServicos := FieldByName('Mov_TotalServicos').AsFloat;
+      Movimento.Acrescimo := FieldByName('Mov_Acrescimo').AsFloat;
+      Movimento.Desconto := FieldByName('Mov_Desconto').AsFloat;
+      Movimento.Frete := FieldByName('Mov_Frete').AsFloat;
+      Movimento.QtdadeItens := FieldByName('Mov_QTDEITENS').AsFloat;
+      Movimento.ValorTotal := FieldByName('Mov_ValorFinal').AsFloat;
+      Movimento.Observacoes:= FieldByname('Mov_Observacoes').AsString;
+      Movimento.FormaPagto := FormaPagto.Encontrar(FieldByname('Mov_ForPagto').AsString);
+      Movimento.CondicaoPagto := Condicoes.Encontrar(FieldByname('Mov_Condicoes').AsString);
+      Movimento.Entrega       := FieldByName('Mov_entrega').AsString;
+    end;
+    result := Movimento;
+  end
+  else
+    result := nil;
+
+end;
+
+function TMovimentoDAO.salvar(Movimento: TMovimentoDTO): Boolean;
+
+  procedure salvaritensMovimento;
+  var
+    novoProduto : TProdutoVenda;
+  begin
+    novoProduto := TProdutoVenda.Create;
+
+    fdmConexao.BANCO.StartTransaction;
+
+    for novoProduto in Movimento.Produtos do
+    begin
+      QryCadastrar.sql.clear;
+      QryCadastrar.sql.add('insert into movimentoitens '+
+                          '(Mitens_codigo,Mitens_movimento, '+
+                          'Mitens_produto,Mitens_Cliente,mitens_quantidade,mitens_preco) values '+
+                          '(:Mitens_codigo,:Mitens_movimento, '+
+                          ':Mitens_produto,:Mitens_Cliente,:mitens_quantidade,:mitens_preco)');
+      QryCadastrar.Params[0].AsString :=
+      fdmConexao.retornaCodigoMaximo('Mitens_codigo','MovimentoItens');
+      QryCadastrar.Params[1].AsString := Movimento.Codigo;
+      QryCadastrar.Params[2].AsString := novoProduto.Produto.Codigo;
+      QryCadastrar.Params[3].AsString := Movimento.Cliente.Codigo;
+      QryCadastrar.Params[4].AsFloat := novoProduto.Quantidade;
+      QryCadastrar.Params[5].AsFloat := novoProduto.Produto.ValorVenda;
+      QryCadastrar.ExecSQL;
+    end;
+
+    fdmConexao.BANCO.Commit;
+  end;
+
+  procedure salvarParcelasMovimento;
+    var
+      novaParcela : TPagamentosMovimentoDTO;
+  begin
+
+    for novaParcela in Movimento.PagamentosMovimento do
+    begin
+      ParcelasDAO.Salvar(novaParcela);
+    end;
+  end;
+
+  procedure salvarDescricaoDosPagamentos;
+  var Descricao: TPagamentoDTO;
+  DescricaoPagamento : FPagamentoDescricao;
+  begin
+    DescricaoPagamento := FPagamentoDescricao.Create;
+
+    for Descricao in Movimento.Descricao do
+      DescricaoPagamento.Salvar(Descricao);
+  end;
+
+begin
+  if fdmConexao.BANCO.InTransaction then
+    fdmConexao.BANCO.Rollback;
+
+  fdmConexao.BANCO.StartTransaction;
+
+  QryCadastrar.sql.Clear;
+  try
+    if FStatus in [0,1] then
+      QryCadastrar.sql.Add('INSERT INTO MOVIMENTO '+
+                            '(MOV_CODIGO,MOV_CLIENTE,MOV_DATA,MOV_TIPO, '+
+                            'MOV_TOTALPRODUTOS,MOV_TOTALSERVICOS, '+
+                            'MOV_ACRESCIMO,MOV_DESCONTO,MOV_FRETE, '+
+                            'MOV_QTDEITENS,MOV_VALORFINAL,Mov_Observacoes, ' +
+                            'MOV_FORPAGTO,Mov_Condicoes,MOV_Entrega)'+
+                            'VALUES '+
+                            '(:MOV_CODIGO,:MOV_CLIENTE,:MOV_DATA,:MOV_TIPO, '+
+                            ':MOV_TOTALPRODUTOS,:MOV_TOTALSERVICOS, '+
+                            ':MOV_ACRESCIMO,:MOV_DESCONTO,:MOV_FRETE, '+
+                            ':MOV_QTDEITENS,:MOV_VALORFINAL,:Mov_Observacoes, '+
+                            ':MOV_FORPAGTO,:Mov_Condicoes,:MOV_Entrega)')
+    else
+    if FStatus = 2 then
+      QryCadastrar.sql.Add('UPDATE MOVIMENTO SET  '+
+                           'MOV_CODIGO=:MOV_CODIGO,MOV_CLIENTE=:MOV_CLIENTE, '+
+                           'MOV_DATA=:MOV_DATA,MOV_TIPO=:MOV_TIPO, '+
+                           'MOV_TOTALPRODUTOS=:MOV_TOTALPRODUTOS, '+
+                           'MOV_TOTALSERVICOS=:MOV_TOTALSERVICOS, '+
+                           'MOV_ACRESCIMO=:MOV_ACRESCIMO, ' +
+                           'MOV_DESCONTO=:MOV_DESCONTO,MOV_FRETE=:MOV_FRETE, '+
+                           'MOV_QTDEITENS=:MOV_QTDEITENS, '+
+                           'MOV_VALORFINAL=:MOV_VALORFINAL, '+
+                           'Mov_Observacoes=:Mov_Observacoes,MOV_FORPAGTO= ' +
+                           ':MOV_FORPAGTO,Mov_Condicoes=:Mov_Condicoes, '+
+                           'MOV_Entrega=:MOV_Entrega');
+
+    With QryCadastrar do
+    begin
+      params[0].AsString := Movimento.Codigo;
+      params[1].AsString := Movimento.Cliente.Codigo;
+      params[2].AsDate := Movimento.Data;
+      params[3].AsString := Movimento.Tipo;
+      params[4].AsFloat := Movimento.TotalProdutos;
+      params[5].AsFloat := Movimento.TotalServicos;
+      params[6].AsFloat := Movimento.Acrescimo;
+      params[7].AsFloat := Movimento.Desconto;
+      params[8].AsFloat := Movimento.Frete;
+      params[9].AsFloat := Movimento.QtdadeItens;
+      params[10].AsFloat := Movimento.ValorTotal;
+      params[11].AsString := Movimento.Observacoes;
+      params[12].AsString := Movimento.FormaPagto.Codigo;
+      params[13].AsString := Movimento.CondicaoPagto.Codigo;
+      params[14].AsString := Movimento.Entrega;
+      ExecSql;
+    end;
+
+    fdmConexao.BANCO.Commit;
+
+    ProdutoDAO.SalvarLista(Movimento,Movimento.Produtos);
+    salvarParcelasMovimento;
+    salvarDescricaoDosPagamentos;
+
+    result := true;
+  except
+    result := false;
+  end;
+
+end;
+
+end.

@@ -1,0 +1,130 @@
+unit BairroDAO;
+
+
+
+interface
+uses BairroDTO,FireDAC.Stan.Intf, FireDAC.Stan.Option,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client,Vcl.Dialogs,System.SysUtils;
+  type
+    TBairroDAO = class
+      public
+        mStatus:integer;
+        function salvar(Bairro: TBairroDTO): boolean;
+        function alterar(Bairro: TBairroDTO):Boolean;
+        function inativar(Bairro:TBairroDTO):Boolean;
+        function Encontrar(ACodigo:String): TBairroDTO;
+        function encontrarCodigoMaximo:String;
+        constructor create; overload;
+        destructor destroy; overload;
+      private
+        QryCadastro : TFDQuery;
+        QryPesquisa  : TFDQuery;
+    end;
+
+implementation
+
+{ TBairroDAO }
+
+uses dmConexao,MunicipioDAO,MunicipioDTO;
+
+function TBairroDAO.alterar(Bairro: TBairroDTO): Boolean;
+begin
+  mStatus := 2;
+  salvar(Bairro);
+  result:= true;
+end;
+
+constructor TBairroDAO.create;
+begin
+  QryCadastro := TFDQuery.Create(nil);
+  QryPesquisa := TFDQuery.Create(nil);
+  QryCadastro.Connection := fdmConexao.BANCO;
+  QryPesquisa.Connection := fdmConexao.BANCO;
+end;
+
+destructor TBairroDAO.destroy;
+begin
+  QryCadastro.Free;
+  QryPesquisa.Free;
+  QryCadastro := nil;
+  QryPesquisa := nil;
+end;
+
+function TBairroDAO.Encontrar(ACodigo: String): TBairroDTO;
+var
+  BairroEncontrado : TBairroDTO;
+  MunicipioDTO : TMunicipioDTO;
+  MunicipioDAO : TMunicipioDAO;
+begin
+  QryCadastro.SQL.Clear;
+  QryCadastro.SQL.ADD('SELECT * FROM BAIRRO where bai_codigo = '+ACodigo);
+  QryCadastro.Open;
+  if QryCadastro.RecordCount > 0 then
+  begin
+    BairroEncontrado := TBairroDTO.Create;
+    MunicipioDTO := TMunicipioDTO.Create;
+    MunicipioDAO := TMunicipioDAO.Create;
+    with QryCadastro do
+    begin
+      MunicipioDTO := MunicipioDAO.Encontrar(FieldByName('bai_Municipio').AsString);
+      BairroEncontrado.Codigo    := FieldByName('Bai_Codigo').AsString;
+      BairroEncontrado.Nome      := FieldByName('Bai_Nome').AsString;
+      BairroEncontrado.Estado    := FieldByName('Bai_Estado').AsString;
+      BairroEncontrado.Municipio := MunicipioDTO;
+    end;
+    result := BairroEncontrado;
+
+  end
+  else
+  result := nil;
+end;
+
+function TBairroDAO.encontrarCodigoMaximo: String;
+begin
+  QryPesquisa.sql.clear;
+  Qrypesquisa.sql.add('SELECT MAX(BAI_CODIGO) as Codigo FROM BAIRRO');
+  Qrypesquisa.Open;
+  result := IntToStr(qrypesquisa.FieldByName('codigo').AsInteger + 1)
+end;
+
+function TBairroDAO.inativar(Bairro: TBairroDTO): Boolean;
+begin
+    //
+end;
+
+function TBairroDAO.salvar(Bairro: TBairroDTO): boolean;
+begin
+  if fdmConexao.BANCO.InTransaction then
+    fdmConexao.BANCO.Rollback;
+
+  fdmConexao.BANCO.StartTransaction;
+
+  QryCadastro.SQL.Clear;
+
+  if mStatus in [0,1] then
+    QryCadastro.SQL.Add('INSERT INTO Bairro'+
+                        '(bai_codigo,bai_nome,bai_municipio,bai_estado) '+
+                        'VALUES '+
+                        '(:bai_codigo,:bai_nome,:bai_municipio,:bai_estado)')
+  else
+  if mStatus = 2 then
+    QryCadastro.SQL.Add('UPDATE SET Bairro'+
+                        '(bai_codigo= :bai_codigo,bai_nome= :bai_nome, '+
+                        'bai_municipio= :bai_municipio,bai_estado= :bai_estado)'+
+                        ' where bai_codigo = '+bairro.Codigo);
+
+
+  QryCadastro.Params[0].AsString := Bairro.Codigo;
+  QryCadastro.Params[1].AsString := Bairro.Nome;
+  QryCadastro.Params[2].AsString := Bairro.Municipio.Nome;
+  QryCadastro.Params[3].AsString := Bairro.Estado;
+
+  QryCadastro.ExecSQL;
+  fdmConexao.BANCO.Commit;
+  result := true
+
+end;
+
+end.

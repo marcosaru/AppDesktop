@@ -1,0 +1,18 @@
+unit FormaPagtoDTO;
+
+interface
+  type
+    TFormaPagtoDTO = class
+      private
+        FCodigo: string;
+        FDescricao: String;
+        FRepresentaAV: Integer;
+      public
+        property Codigo : String read FCodigo write FCodigo;
+        property Descricao : String read FDescricao write FDescricao;
+        property Avista : Integer read FRepresentaAV write FRepresentaAV;
+    end;
+
+implementation
+
+end.

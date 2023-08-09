@@ -1,0 +1,91 @@
+unit uPesBairro;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client;
+
+type
+  TFrmPesBairro = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnCadastrar: TButton;
+    Button1: TButton;
+    Button2: TButton;
+    btnCancelar: TButton;
+    DBGrid1: TDBGrid;
+    DtsBairro: TDataSource;
+    QryPesquisa: TFDQuery;
+    QryPesquisaBAI_NOME: TStringField;
+    QryPesquisaBAI_CODIGO: TIntegerField;
+    QryPesquisaMUN_NOME: TStringField;
+    QryPesquisaEST_NOME: TStringField;
+    QryPesquisaMUN_CODIGO: TIntegerField;
+    QryPesquisaEST_CODIGO: TIntegerField;
+    procedure btnCadastrarClick(Sender: TObject);
+    procedure DBGrid1DblClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure carrega;
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    FStatus : integer;
+  end;
+
+var
+  FrmPesBairro: TFrmPesBairro;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao,uCadBairro;
+
+procedure TFrmPesBairro.btnCadastrarClick(Sender: TObject);
+begin
+  try
+    FrmCadBairro := TFrmCadBairro.Create(self);
+    FrmCadBairro.FStatus := 1;
+    FrmCadBairro.ShowModal;
+  finally
+    FrmCadBairro.Free;
+    carrega;
+  end;
+end;
+
+procedure TFrmPesBairro.carrega;
+begin
+  Qrypesquisa.SQl.Clear;
+  qrypesquisa.sql.add('select bai_codigo,bai_nome,mun_nome,est_nome,mun_codigo,est_nome,est_codigo from bairro '+
+                      'join municipio '+
+                      'on mun_codigo = bai_municipio '+
+                      'join estado                   '+
+                      'on mun_estado = est_codigo order by mun_nome');
+  qrypesquisa.open;
+end;
+
+procedure TFrmPesBairro.DBGrid1DblClick(Sender: TObject);
+begin
+  ModalResult := MrOk;
+end;
+
+procedure TFrmPesBairro.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if key = VK_ESCAPE then
+    btnCancelar.Click();
+end;
+
+procedure TFrmPesBairro.FormShow(Sender: TObject);
+begin
+  carrega;
+end;
+
+end.

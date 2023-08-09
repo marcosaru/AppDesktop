@@ -1,0 +1,59 @@
+unit uFiltroVenda;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Mask;
+
+type
+  TFrmFiltro = class(TForm)
+    pnlOpcoes: TPanel;
+    pnlBotoes: TPanel;
+    btnConfirmar: TButton;
+    btnCancelar: TButton;
+    MaskEdit1: TMaskEdit;
+    Edit1: TEdit;
+    Edit2: TEdit;
+    Edit3: TEdit;
+    Edit4: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
+    CheckBox3: TCheckBox;
+    MaskEdit2: TMaskEdit;
+    Label3: TLabel;
+    Edt_ValorInicial: TMaskEdit;
+    procedure btnCancelarClick(Sender: TObject);
+    procedure Edt_ValorInicialEnter(Sender: TObject);
+    procedure Edt_ValorInicialExit(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmFiltro: TFrmFiltro;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmFiltro.btnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmFiltro.Edt_ValorInicialEnter(Sender: TObject);
+begin
+  Edt_ValorInicial.EditMask := '';
+end;
+
+procedure TFrmFiltro.Edt_ValorInicialExit(Sender: TObject);
+begin
+ Edt_ValorInicial.EditMask := '###,###,##0.00';
+end;
+
+end.

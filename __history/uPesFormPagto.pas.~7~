@@ -1,0 +1,84 @@
+unit uPesFormPagto;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client;
+
+type
+  TFrmPesFormaPagamento = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnCadastrar: TButton;
+    btnAlterar: TButton;
+    btnApresentar: TButton;
+    btnCancelar: TButton;
+    Grid: TDBGrid;
+    DataSource1: TDataSource;
+    QryPesquisa: TFDQuery;
+    QryPesquisaFORPAGTO_CODIGO: TIntegerField;
+    QryPesquisaFORPAGTO_DESCRICAO: TStringField;
+    procedure btnCadastrarClick(Sender: TObject);
+    procedure btnApresentarClick(Sender: TObject);
+    procedure btnAlterarClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+    procedure AbrirCadastro(ACodigo:integer);
+    procedure Carregar;
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmPesFormaPagamento: TFrmPesFormaPagamento;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao, uCadFormaPagamento;
+
+procedure TFrmPesFormaPagamento.AbrirCadastro(ACodigo: integer);
+begin
+   try
+    FrmCadFormaPagamento := TFrmCadFormaPagamento.create(Self,ACodigo);
+    FrmCadFormaPagamento.ShowModal;
+  finally
+    FrmCadFormaPagamento.Free;
+  end;
+end;
+
+procedure TFrmPesFormaPagamento.btnCadastrarClick(Sender: TObject);
+begin
+  AbrirCadastro(1);
+end;
+
+procedure TFrmPesFormaPagamento.Carregar;
+begin
+  QryPesquisa.SQL.Clear;
+  QryPesquisa.SQL.Add('SELECT * FROM FORMAPAGTO');
+  QryPesquisa.Open;
+end;
+
+procedure TFrmPesFormaPagamento.FormShow(Sender: TObject);
+begin
+  Carregar;
+end;
+
+procedure TFrmPesFormaPagamento.btnAlterarClick(Sender: TObject);
+begin
+  AbrirCadastro(2);
+end;
+
+procedure TFrmPesFormaPagamento.btnApresentarClick(Sender: TObject);
+begin
+  AbrirCadastro(3);
+end;
+
+end.

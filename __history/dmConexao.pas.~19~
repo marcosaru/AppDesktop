@@ -1,0 +1,56 @@
+unit dmConexao;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Phys.IB,
+  FireDAC.Phys.IBDef, FireDAC.VCLUI.Wait, FireDAC.Comp.Client, Data.DB,
+  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
+
+type
+  TfdmConexao = class(TDataModule)
+    BANCO: TFDConnection;
+    FDTransaction1: TFDTransaction;
+    QryCadastro: TFDQuery;
+    QryAux: TFDQuery;
+    QryBusca: TFDQuery;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    constructor create(AOwner:TCOmponent);override;
+    function retornaCodigoMaximo(APk,ATabelaNome:String):String;
+  end;
+
+var
+  fdmConexao: TfdmConexao;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+{ TfdmConexao }
+
+constructor TfdmConexao.create(AOwner:TCOmponent);
+begin
+  inherited create(AOwner);
+  BANCO.Params.Database := ExtractFilePath(ParamStr(0)) + 'Banco\Banco.fdb'
+end;
+
+function TfdmConexao.retornaCodigoMaximo(APk, ATabelaNome: String): String;
+begin
+   QryBusca.sql.Clear;
+   QryBusca.SQL.Add('SELECT MAX ('+APk+') as codigo from '+ATabelaNome);
+   QryBusca.Open;
+   if (QryBusca.RecordCount = 0) or (QryBusca.FieldByName('Codigo').AsInteger <= 0) then
+     result := '1'
+   else
+     result := IntToStr(QryBusca.FieldByName('codigo').AsInteger + 1);
+end;
+
+end.

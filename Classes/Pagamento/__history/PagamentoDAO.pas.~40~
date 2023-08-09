@@ -1,0 +1,185 @@
+unit PagamentoDAO;
+
+interface
+  uses
+    FireDAC.Stan.Intf, FireDAC.Stan.Option,System.Generics.Collections,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client,Vcl.Dialogs,System.SysUtils,
+    FormaPagtoDTO,FormaPagtoDAO,MovimentoDTO,MovimentoDAO,PagamentoDTO;
+  type
+    TPagamentoDAO = class
+      private
+        FStatus : integer;
+        Movimento : TMovimentoDTO;
+        Pagamento : TPagamentoDTO;
+        Pagamentos : TObjectList<TPagamentoDTO>;
+        MovimentoDAO : TMovimentoDAO;
+        FormaPagto : TFormaPagtoDTO;
+        FormaPagtoDAO : TFormaPagtoDAO;
+        QryAux : TFDQuery;
+        QryCad : TFDQuery;
+        QryPes : TFDQuery;
+      public
+        constructor create;
+        destructor destroy;
+        function Salvar(Pagamento : TPagamentoDTO):Boolean;
+        Function SalvarLista(MovimentoASalvar:TMovimentoDTO):Boolean;
+        Function Alterar(Pagamento : TPagamentoDTO):Boolean;
+        Function EncontrarLista(Movimento:TMovimentoDTO):TObjectList<TPagamentoDTO>;
+        Function Encontrar(Pagamentos: TObjectList<TPagamentoDTO>;ACodigo:String):TObjectList<TPagamentoDTO>;
+
+    end;
+
+implementation
+
+{ TPagamentoDAO }
+
+uses dmConexao,PagamentoAbstrato;
+
+function TPagamentoDAO.Alterar(Pagamento: TPagamentoDTO): Boolean;
+begin
+  FStatus := 2;
+  salvar(Pagamento);
+end;
+
+constructor TPagamentoDAO.create;
+begin
+  Movimento     := TMovimentoDTO.create;
+  MovimentoDAO  := TMovimentoDAO.create;
+  FormaPagto    := TFormaPagtoDTO.create;
+  FormaPagtoDAO := TFormaPagtoDAO.create;
+  Pagamento     := TPagamentoDTO.create;
+
+  QryAux        := TFDQuery.Create(Nil);
+  QryCad        := TFDQuery.Create(Nil);
+  QryPes        := TFDQuery.Create(Nil);
+
+  QryAux.Connection := fdmConexao.BANCO;
+  QryCad.Connection := fdmConexao.BANCO;
+  QryPes.Connection := fdmConexao.BANCO;
+end;
+
+destructor TPagamentoDAO.destroy;
+begin
+  freeAndNil(Movimento);
+  freeAndNil(MovimentoDAO);
+  freeAndNil(FormaPagto);
+  freeAndNil(FormaPagtoDAO);
+  freeAndNil(Pagamento);
+  freeAndNil(QryAux);
+  freeAndNil(QryCad);
+  freeAndNil(QryPes);
+
+  inherited;
+end;
+
+function TPagamentoDAO.Encontrar(Pagamentos : TObjectList<TPagamentoDTO>;ACodigo: String): TObjectList<TPagamentoDTO>;
+begin
+  QryPes.SQL.Clear;
+  QryPes.SQL.Add('SELECT * FROM PAGAMENTO WHERE PAG_CODIGO = :PAG_CODIGO');
+  QryPes.ParamByName('PAG_CODIGO').AsString := ACodigo;
+  QryPes.Open;
+
+  if QryPes.RecordCount > 0 then
+  begin
+    while not QryPes.Eof do
+    begin
+      With QryPes do
+      begin
+        Pagamento.Codigo := FieldByName('pag_codigo').AsString;
+        Pagamento.DataVcto:= FieldByName('PAG_DATAVCTO').AsDateTime;
+        Pagamento.FormaPagto := FormaPagtoDAO.Encontrar(FieldByName('pag_formapagto').AsString);
+        Pagamento.Valor := FieldByName('pag_valor').AsFloat;
+        Pagamento.Movimento := FieldByName('pag_Movimento').AsString;
+        pagamentos.Add(Pagamento.Clone(Pagamento));
+      end;
+      QryPes.Next
+    end;
+    result:= Pagamentos;
+  end
+    else
+      result := nil;
+end;
+
+function TPagamentoDAO.EncontrarLista(Movimento:TMovimentoDTO): TObjectList<TPagamentoDTO>;
+var
+  ForPagto : TFormaPagtoDTO;
+begin
+  QryPes.SQL.Clear;
+  QryPes.SQL.Add('SELECT * FROM PAGAMENTO WHERE PAG_MOVIMENTO = :PAG_MOVIMENTO');
+  QryPes.ParamByName('PAG_MOVIMENTO').AsString := Movimento.Codigo;
+  QryPes.Open;
+
+  if QryPes.RecordCount > 0 then
+  begin
+    while not QryPes.Eof do
+    begin
+      With QryPes do
+      begin
+        ForPagto := FormaPagtoDAO.Encontrar(FieldByName('pag_formapagto').AsString);
+
+        Pagamento.Codigo := FieldByName('pag_codigo').AsString;
+        Pagamento.DataVcto:= FieldByName('PAG_DATAVCTO').AsDateTime;
+        Pagamento.FormaPagto := ForPagto.Clone(ForPagto);
+        Pagamento.Valor := FieldByName('pag_valor').AsFloat;
+        Pagamento.Movimento := FieldByName('pag_Movimento').AsString;
+
+        Movimento.Descricao.Add(Pagamento.Clone(Pagamento));
+
+      end;
+      QryPes.Next
+    end;
+    result:= Movimento.Descricao;
+  end
+    else
+      result := nil;
+end;
+
+function TPagamentoDAO.Salvar(Pagamento: TPagamentoDTO): Boolean;
+begin
+  if fdmConexao.BANCO.InTransaction then
+    fdmConexao.BANCO.Rollback;
+
+  fdmConexao.BANCO.StartTransaction;
+
+  try
+    QryCad.SQL.Clear;
+    if FStatus in [0,1] then
+      QryCad.SQL.Add('INSERT INTO PAGAMENTO (PAG_CODIGO,PAG_MOVIMENTO,PAG_FORMAPAGTO,' +
+                   'PAG_DATAVCTO,PAG_VALOR) VALUES (:PAG_CODIGO,:PAG_MOVIMENTO,:PAG_FORMAPAGTO,' +
+                   ':PAG_DATAVCTO,:PAG_VALOR)')
+    else
+      QryCad.SQL.Add('UPDATE PAGAMENTO SET PAG_MOVIMENTO= :PAG_MOVIMENTO, '+
+                     'PAG_FORMAPAGTO= :PAG_FORMAPAGTO,PAG_DATAVCTO=:PAG_DATAVCTO,'+
+                   'PAG_VALOR=:PAG_VALOR where PAG_CODIGO = :PAG_CODIGO');
+
+    QryCad.ParamByName('PAG_CODIGO').AsString := Pagamento.Codigo;
+    QryCad.ParamByName('PAG_MOVIMENTO').AsString := Pagamento.Movimento;
+    QryCad.ParamByName('PAG_FORMAPAGTO').AsString := Pagamento.FormaPagto.Codigo;
+    QryCad.ParamByName('PAG_DATAVCTO').AsDateTime := Pagamento.DataVcto;
+    QryCad.ParamByName('PAG_VALOR').AsFloat := Pagamento.Valor;
+    QryCad.ExecSQL;
+    fdmConexao.BANCO.Commit;
+    result := true;
+  Except
+    result := false;
+  end;
+end;
+
+function TPagamentoDAO.SalvarLista(MovimentoASalvar: TMovimentoDTO): Boolean;
+var Descricao: TPagamentoDTO;
+ // DescricaoPagamento : FPagamentoDescricao;
+begin
+  try
+    //DescricaoPagamento := FPagamentoDescricao.Create;
+
+    for Descricao in Movimento.Descricao do
+      Salvar(Descricao);
+
+  finally
+ //   DescricaoPagamento.Free;
+  end;
+end;
+
+end.

@@ -1,0 +1,241 @@
+unit uPesVencimentos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client, uCurrencyEditVCL,System.DateUtils;
+
+type
+  TFrmPesVencimentos = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnReceber: TButton;
+    btnApresentar: TButton;
+    btnCancelar: TButton;
+    Grid: TDBGrid;
+    DtsVencimentos: TDataSource;
+    QryPesquisa: TFDQuery;
+    Edt_ValorTotal: TCurrencyEdit;
+    Label1: TLabel;
+    Edt_ValorMes: TCurrencyEdit;
+    Label2: TLabel;
+    QryPesquisaPAG_MOVIMENTO: TIntegerField;
+    QryPesquisaPAG_DATAVENDA: TDateField;
+    QryPesquisaPAG_DATAVCTO: TDateField;
+    QryPesquisaPAG_NUMERODAPARCELA: TIntegerField;
+    QryPesquisaPAG_JUROS: TIntegerField;
+    QryPesquisaPAG_MULTA: TIntegerField;
+    QryPesquisaPAG_OBSERVACOES: TStringField;
+    QryPesquisaPAG_VALOR: TSingleField;
+    CbbMes: TComboBox;
+    btnBuscar: TButton;
+    QryPesquisaCLI_NOME: TStringField;
+    Label3: TLabel;
+    Edt_CodigoCliente: TEdit;
+    Edt_Cliente: TEdit;
+    Label4: TLabel;
+    btnBuscarCliente: TButton;
+    QryPesquisaPAG_CODIGO: TIntegerField;
+    procedure btnCancelarClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormShow(Sender: TObject);
+    procedure carregar(AMes:Integer = 0;ACliCodigo:String = '');
+    procedure btnBuscarClick(Sender: TObject);
+    procedure GridDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure btnBuscarClienteClick(Sender: TObject);
+    procedure btnReceberClick(Sender: TObject);
+    procedure GridTitleClick(Column: TColumn);
+  private
+    { Private declarations }
+    QryTotal : TFDQuery;
+    ordenacao: string;
+    MesAtual,AnoAtual: Integer;
+    ValorTotal: Double;
+  public
+    { Public declarations }
+    destructor destroy;
+  end;
+
+var
+  FrmPesVencimentos: TFrmPesVencimentos;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao, uPesCliente, uCadPagamento;
+
+procedure TFrmPesVencimentos.btnBuscarClienteClick(Sender: TObject);
+begin
+  Try
+    FrmPesCliente := TFrmPesCliente.create(Self);
+    FrmPesCliente.ShowModal;
+  Finally
+    if FrmPesCliente.ModalResult = mrOk then
+    begin
+      Edt_CodigoCliente.Text := FrmPesCliente.QryPesquisaCLI_CODIGO.AsString;
+      Edt_Cliente.Text       := FrmPesCliente.QryPesquisaCLI_NOME.AsString;
+    end;
+    FrmPesCliente.Free;
+  End;
+end;
+
+procedure TFrmPesVencimentos.btnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmPesVencimentos.btnReceberClick(Sender: TObject);
+begin
+  Try
+    FrmCadRecebimento := TFrmCadRecebimento.Create(Self);
+    FrmCadRecebimento.ShowModal;
+  Finally
+    if FrmCadRecebimento.ModalResult = mrOk then
+      carregar();
+    FrmCadRecebimento.Free;
+  End;
+end;
+
+procedure TFrmPesVencimentos.btnBuscarClick(Sender: TObject);
+begin
+  Carregar(CbbMes.ItemIndex+1,Edt_CodigoCliente.Text)
+end;
+
+procedure TFrmPesVencimentos.carregar(AMes:Integer = 0;ACliCodigo:String = '');
+  procedure CarregarValorEdts;
+  begin
+    QryTotal.SQL.Clear;
+    QryTotal.SQL.Add('Select (select sum(Pag_valor) from pagamentos '+
+                     'where (EXTRACT(MONTH FROM pag_datavcto)) = :MesAtual) As Mes, '+
+                     '(select sum(Pag_valor) from pagamentos '+
+                     'where (EXTRACT(Year FROM pag_datavcto)) = :AnoAtual) As Ano '+
+                     'From pagamentos ');
+
+    QryTotal.ParamByName('MesAtual').AsInteger := MesAtual;
+    QryTotal.ParamByName('AnoAtual').AsInteger := AnoAtual;
+
+    QryTotal.Open
+  end;
+
+begin
+  if AMes > 0  then
+    MesAtual := AMes
+  else
+    MesAtual := MonthOf(Now);
+
+  AnoAtual := YearOf(Now);
+
+  QryPesquisa.SQL.Clear;
+  QryPesquisa.SQL.Add('select pag_codigo,pag_movimento,cli_nome,pag_datavenda,pag_datavcto, '+
+                      'pag_numerodaparcela,pag_juros,Pag_multa, '+
+                      'pag_observacoes,pag_valor from pagamentos '+
+                      'join movimento on pag_movimento = mov_codigo '+
+                      'join cliente on mov_cliente = cli_codigo '+
+                      'where  '+
+                      '  pag_dataPagto IS NULL ');
+  if AMes > 0  then
+  begin
+    QryPesquisa.SQL.Add(' AND (EXTRACT(MONTH FROM pag_datavcto)) = :MesAtual ');
+    QryPesquisa.ParamByName('MesAtual').AsInteger := AMes;
+  end;
+
+  if ACliCodigo <> '' then
+    QryPesquisa.SQL.Add(' AND CLI_Codigo = ' + QuotedStr(ACliCodigo));
+
+  if ordenacao = '' then
+    QryPesquisa.SQL.Add(' Order By pag_datavcto ')
+  else
+    QryPesquisa.SQL.Add(ordenacao);
+
+
+  QryPesquisa.Open();
+
+  CarregarValorEdts;
+
+  ValorTotal := 0;
+
+  Edt_ValorTotal.Value := QryTotal.FieldByName('Ano').AsFloat;
+  QryPesquisa.First;
+
+  while Not QryPesquisa.EoF do
+  begin
+    ValorTotal := ValorTotal + QryPesquisaPAG_VALOR.AsFloat;
+    QryPesquisa.Next;
+  end;
+
+  Edt_ValorMes.Value := ValorTotal;
+end;
+
+destructor TFrmPesVencimentos.destroy;
+begin
+  QryTotal.Free;
+  inherited;
+end;
+
+procedure TFrmPesVencimentos.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #27 then
+    btnCancelarClick(Self);
+end;
+
+procedure TFrmPesVencimentos.FormShow(Sender: TObject);
+begin
+  QryTotal := TFDQuery.Create(nil);
+  QryTotal.Connection := fdmConexao.BANCO;
+
+  carregar;
+  QryPesquisa.First;
+end;
+
+procedure TFrmPesVencimentos.GridDrawColumnCell(Sender: TObject;
+  const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
+begin
+  if QryPesquisaPAG_DATAVCTO.AsDateTime < Now then
+  begin
+    if gdSelected in State then
+    begin
+      Grid.Canvas.Font.Color := clHighlightText;
+      Grid.Canvas.Brush.Color := clHighlight;
+      Grid.Canvas.Font.Style := [fsBold];
+    end
+    else
+    begin
+      Grid.Canvas.Font.Color := clRed;
+      Grid.Canvas.Font.Style := [fsBold];
+    end;
+  end;
+
+  Grid.DefaultDrawColumnCell(Rect, DataCol, Column, State);
+
+end;
+
+procedure TFrmPesVencimentos.GridTitleClick(Column: TColumn);
+begin
+  if Column.FieldName = 'CLI_NOME' then
+    ordenacao := 'cli_nome '
+  else
+  if Column.FieldName = 'PAG_DATAVENDA' then
+    ordenacao := ' PAG_DATAVENDA '
+  else
+  if Column.FieldName = 'PAG_DATAVCTO' then
+    ordenacao := ' PAG_DATAVCTO '
+  else
+  if Column.FieldName = 'PAG_VALOR' then
+    ordenacao := ' PAG_VALOR DESC'
+  else
+    exit;
+
+  ordenacao := ' Order By ' + ordenacao;
+  carregar(0,Edt_CodigoCliente.Text);
+  QryPesquisa.First;
+end;
+
+End.

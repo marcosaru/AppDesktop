@@ -1,0 +1,26 @@
+unit CondicoesDAO;
+
+interface
+  uses CondicoesDTO,FireDAC.Stan.Intf, FireDAC.Stan.Option,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+    type
+      TCondicoesDAO = class
+      private
+        QryPesquisa : TFDQuery;
+        QryCadastro : TFDQuery;
+        QryAux      : TFDQuery;
+        FormaPagto  : TCondicoesDTO;
+        FStatus     : integer;
+      public
+        constructor create;
+        destructor destroy;
+        function Encontrar(ACodigo:string):TCondicoesDTO;
+        function salvar(Condicao:TCondicoesDTO):boolean;
+        function Alterar(Condicao:TCondicoesDTO):Boolean;
+      end;
+
+implementation
+
+end.

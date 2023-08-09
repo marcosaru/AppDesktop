@@ -1,0 +1,498 @@
+object FrmCadCliente: TFrmCadCliente
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'Cadastrar Cliente'
+  ClientHeight = 191
+  ClientWidth = 880
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label7: TLabel
+    Left = 288
+    Top = 70
+    Width = 45
+    Height = 13
+    Caption = 'Endere'#231'o'
+  end
+  object pnlBotoes: TPanel
+    Left = 790
+    Top = 0
+    Width = 90
+    Height = 191
+    Align = alRight
+    TabOrder = 0
+    ExplicitLeft = 796
+    ExplicitHeight = 206
+    object btnConfirma: TButton
+      Left = 6
+      Top = 47
+      Width = 75
+      Height = 25
+      Caption = 'Confirmar'
+      TabOrder = 0
+      OnClick = btnConfirmaClick
+    end
+    object btnCancelar: TButton
+      Left = 5
+      Top = 78
+      Width = 75
+      Height = 25
+      Caption = 'Cancelar'
+      TabOrder = 1
+      OnClick = btnCancelarClick
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 790
+    Height = 191
+    Align = alClient
+    TabOrder = 1
+    ExplicitWidth = 796
+    ExplicitHeight = 206
+    object PageControl1: TPageControl
+      Left = 1
+      Top = 1
+      Width = 788
+      Height = 189
+      ActivePage = Fisica
+      Align = alClient
+      TabOrder = 0
+      ExplicitWidth = 794
+      ExplicitHeight = 204
+      object Fisica: TTabSheet
+        Caption = 'Fisica'
+        object pnlCadastro: TPanel
+          Left = 0
+          Top = 0
+          Width = 785
+          Height = 177
+          TabOrder = 0
+          object Label5: TLabel
+            Left = 2
+            Top = 119
+            Width = 45
+            Height = 13
+            Caption = 'Endere'#231'o'
+          end
+          object Label6: TLabel
+            Left = 116
+            Top = 11
+            Width = 55
+            Height = 13
+            Caption = 'Estado Civil'
+          end
+          object Label8: TLabel
+            Left = 298
+            Top = 11
+            Width = 55
+            Height = 13
+            Caption = 'Nascimento'
+          end
+          object Label4: TLabel
+            Left = 4
+            Top = 92
+            Width = 43
+            Height = 13
+            Caption = 'Municipio'
+          end
+          object Label1: TLabel
+            Left = 14
+            Top = 11
+            Width = 33
+            Height = 13
+            Caption = 'C'#243'digo'
+          end
+          object Label2: TLabel
+            Left = 20
+            Top = 38
+            Width = 27
+            Height = 13
+            Caption = 'Nome'
+          end
+          object Label3: TLabel
+            Left = 19
+            Top = 65
+            Width = 28
+            Height = 13
+            Caption = 'Bairro'
+          end
+          object LabelOcupacao: TLabel
+            Left = 298
+            Top = 69
+            Width = 48
+            Height = 13
+            Caption = 'Ocupa'#231#227'o'
+          end
+          object Label15: TLabel
+            Left = 298
+            Top = 38
+            Width = 19
+            Height = 13
+            Caption = 'CPF'
+          end
+          object btnProcurarMunicipio: TButton
+            Left = 272
+            Top = 89
+            Width = 17
+            Height = 22
+            Caption = '...'
+            TabOrder = 0
+            OnClick = btnProcurarMunicipioClick
+          end
+          object Edt_Cpf: TMaskEdit
+            Left = 334
+            Top = 35
+            Width = 95
+            Height = 21
+            EditMask = '!999.999.000-00;1;_'
+            MaxLength = 14
+            TabOrder = 1
+            Text = '   .   .   -  '
+          end
+          object ChkFuncionarioPublico: TCheckBox
+            Left = 298
+            Top = 89
+            Width = 59
+            Height = 17
+            Caption = 'Publico'
+            TabOrder = 2
+            OnClick = ChkPrivadaClick
+          end
+          object btnProcurarBairro: TButton
+            Left = 272
+            Top = 62
+            Width = 17
+            Height = 22
+            Caption = '...'
+            TabOrder = 3
+            OnClick = btnProcurarBairroClick
+          end
+          object Edt_CodigoBairro: TEdit
+            Left = 61
+            Top = 62
+            Width = 37
+            Height = 21
+            TabOrder = 4
+          end
+          object Edt_CodigoMunicipio: TEdit
+            Left = 61
+            Top = 89
+            Width = 37
+            Height = 21
+            TabOrder = 5
+          end
+          object ChkPrivada: TCheckBox
+            Left = 367
+            Top = 89
+            Width = 62
+            Height = 17
+            Caption = 'Privada'
+            TabOrder = 6
+            OnClick = ChkPrivadaClick
+          end
+          object Inserir: TButton
+            Left = 601
+            Top = 39
+            Width = 92
+            Height = 25
+            Caption = 'Inserir'
+            TabOrder = 7
+            OnClick = InserirClick
+          end
+          object btnTipoContato: TRadioGroup
+            Left = 450
+            Top = 3
+            Width = 145
+            Height = 61
+            Caption = 'Tipo'
+            ItemIndex = 0
+            Items.Strings = (
+              'Celular'
+              'Email'
+              'Telefone')
+            TabOrder = 8
+          end
+          object Deletar: TButton
+            Left = 695
+            Top = 39
+            Width = 82
+            Height = 25
+            Caption = 'Deletar'
+            TabOrder = 9
+            OnClick = DeletarClick
+          end
+          object GridContatos: TDBGrid
+            Left = 446
+            Top = 70
+            Width = 331
+            Height = 83
+            DataSource = DS
+            Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
+            TabOrder = 10
+            TitleFont.Charset = DEFAULT_CHARSET
+            TitleFont.Color = clWindowText
+            TitleFont.Height = -11
+            TitleFont.Name = 'Tahoma'
+            TitleFont.Style = []
+            Columns = <
+              item
+                Expanded = False
+                FieldName = 'Tipo'
+                Visible = True
+              end
+              item
+                Expanded = False
+                FieldName = 'Registro'
+                Title.Caption = 'Valor'
+                Width = 154
+                Visible = True
+              end>
+          end
+          object ChkAutonomo: TCheckBox
+            Left = 367
+            Top = 111
+            Width = 67
+            Height = 17
+            Caption = 'Autonomo'
+            TabOrder = 11
+            OnClick = ChkPrivadaClick
+          end
+          object ChkEstudante: TCheckBox
+            Left = 298
+            Top = 111
+            Width = 67
+            Height = 17
+            Caption = 'Estudante'
+            TabOrder = 12
+          end
+          object Edt_Contato: TEdit
+            Left = 597
+            Top = 8
+            Width = 180
+            Height = 21
+            TabOrder = 13
+          end
+          object Edt_DataNascimento: TMaskEdit
+            Left = 354
+            Top = 8
+            Width = 75
+            Height = 21
+            EditMask = '!99/99/0000;1;_'
+            MaxLength = 10
+            TabOrder = 14
+            Text = '  /  /    '
+          end
+          object Edt_Municipio: TEdit
+            Left = 101
+            Top = 89
+            Width = 188
+            Height = 21
+            Enabled = False
+            TabOrder = 15
+          end
+          object Edt_Endereco: TEdit
+            Left = 61
+            Top = 116
+            Width = 228
+            Height = 21
+            TabOrder = 16
+          end
+          object CbbEstadoCivil: TComboBox
+            Left = 177
+            Top = 8
+            Width = 112
+            Height = 21
+            ItemIndex = 0
+            TabOrder = 17
+            Text = 'Casado'
+            Items.Strings = (
+              'Casado'
+              'Divorciado'
+              'Solteiro')
+          end
+          object Edt_Bairro: TEdit
+            Left = 101
+            Top = 62
+            Width = 188
+            Height = 21
+            Enabled = False
+            TabOrder = 18
+          end
+          object Edt_Codigo: TEdit
+            Left = 61
+            Top = 8
+            Width = 48
+            Height = 21
+            TabOrder = 19
+          end
+          object Edt_Nome: TEdit
+            Left = 61
+            Top = 35
+            Width = 228
+            Height = 21
+            TabOrder = 20
+          end
+        end
+        object pnlEmprego: TPanel
+          Left = 3
+          Top = 198
+          Width = 652
+          Height = 211
+          BevelOuter = bvNone
+          TabOrder = 1
+          Visible = False
+          object Label9: TLabel
+            Left = 19
+            Top = 27
+            Width = 41
+            Height = 13
+            Caption = 'Empresa'
+          end
+          object Label10: TLabel
+            Left = 15
+            Top = 54
+            Width = 45
+            Height = 13
+            Caption = 'Endere'#231'o'
+          end
+          object Label11: TLabel
+            Left = 28
+            Top = 84
+            Width = 32
+            Height = 13
+            Caption = 'Salario'
+          end
+          object Label12: TLabel
+            Left = 286
+            Top = 31
+            Width = 35
+            Height = 13
+            Caption = 'Fun'#231#227'o'
+          end
+          object Label13: TLabel
+            Left = 282
+            Top = 63
+            Width = 39
+            Height = 13
+            Caption = 'Contato'
+          end
+          object Label14: TLabel
+            Left = 15
+            Top = 111
+            Width = 45
+            Height = 13
+            Caption = 'Admiss'#227'o'
+          end
+          object Edt_NomeDaEmpresa: TEdit
+            Left = 74
+            Top = 24
+            Width = 121
+            Height = 21
+            TabOrder = 0
+          end
+          object Edt_LocalDoTrabalho: TEdit
+            Left = 74
+            Top = 51
+            Width = 121
+            Height = 21
+            TabOrder = 1
+          end
+          object Edt_DataAdmissao: TMaskEdit
+            Left = 74
+            Top = 108
+            Width = 75
+            Height = 21
+            EditMask = '!99/99/0000;1;_'
+            MaxLength = 10
+            TabOrder = 2
+            Text = '  /  /    '
+          end
+          object Edt_Cargo: TEdit
+            Left = 327
+            Top = 32
+            Width = 121
+            Height = 21
+            TabOrder = 3
+          end
+          object Edt_Telefone: TEdit
+            Left = 327
+            Top = 60
+            Width = 121
+            Height = 21
+            TabOrder = 4
+          end
+          object Edt_Salario: TCurrencyEdit
+            Left = 74
+            Top = 81
+            Width = 121
+            Height = 21
+            TabOrder = 5
+          end
+        end
+      end
+      object Juridica: TTabSheet
+        Caption = 'Juridica'
+        ImageIndex = 1
+      end
+    end
+    object Panel2: TPanel
+      Left = 442
+      Top = 21
+      Width = 7
+      Height = 181
+      TabOrder = 1
+    end
+  end
+  object Contato: TClientDataSet
+    Aggregates = <>
+    FieldDefs = <
+      item
+        Name = 'Tipo'
+        DataType = ftString
+        Size = 20
+      end
+      item
+        Name = 'Registro'
+        DataType = ftString
+        Size = 70
+      end
+      item
+        Name = 'Type'
+        DataType = ftInteger
+      end>
+    IndexDefs = <>
+    Params = <>
+    StoreDefs = True
+    Left = 838
+    Top = 144
+    object ContatoTipo: TStringField
+      FieldName = 'Tipo'
+    end
+    object ContatoRegistro: TStringField
+      FieldName = 'Registro'
+      Size = 70
+    end
+    object ContatoType: TIntegerField
+      FieldName = 'Type'
+    end
+  end
+  object DS: TDataSource
+    DataSet = Contato
+    Left = 806
+    Top = 144
+  end
+end

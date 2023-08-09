@@ -1,0 +1,32 @@
+unit FrmPes;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls;
+
+type
+  TFrmPesCliente = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnCadastrar: TButton;
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    DBGrid1: TDBGrid;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmPesCliente: TFrmPesCliente;
+
+implementation
+
+{$R *.dfm}
+
+end.

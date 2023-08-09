@@ -1,0 +1,499 @@
+unit uPesRelatorio;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, ClienteDTO,ClienteDAO,ProdutoDTO,ProdutoDAO,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons, Data.DB, Vcl.Grids,
+  Vcl.DBGrids,RelatorioDTO, Vcl.StdCtrls, Vcl.Mask,System.DateUtils,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  Vcl.ExtCtrls;
+
+type
+  TFrmPesRelatorio = class(TForm)
+    btnCliente: TSpeedButton;
+    btnEmpresa: TSpeedButton;
+    btnProduto: TSpeedButton;
+    GridCliente: TDBGrid;
+    Label1: TLabel;
+    Label2: TLabel;
+    Edt_DataInicio: TMaskEdit;
+    Edt_DataFim: TMaskEdit;
+    ChkSemestre: TCheckBox;
+    ChkAnual: TCheckBox;
+    ChkCustomizada: TCheckBox;
+    QryCliente: TFDQuery;
+    DTSAnual: TDataSource;
+    QryClienteCLI_CODIGO: TIntegerField;
+    QryClienteCLI_NOME: TStringField;
+    QryClienteJANEIRO: TFloatField;
+    QryClienteFEVEREIRO: TFloatField;
+    QryClienteMARCO: TFloatField;
+    QryClienteABRIL: TFloatField;
+    QryClienteMAIO: TFloatField;
+    QryClienteJUNHO: TFloatField;
+    QryClienteJULHO: TFloatField;
+    QryClienteAGOSTO: TFloatField;
+    QryClienteSETEMBRO: TFloatField;
+    QryClienteOUTUBRO: TFloatField;
+    QryClienteNOVEMBRO: TFloatField;
+    QryClienteDEZEMBRO: TFloatField;
+    GridProduto: TDBGrid;
+    QryProduto: TFDQuery;
+    DTSProdutos: TDataSource;
+    QryProdutoJANEIRO: TFloatField;
+    QryProdutoFEVEREIRO: TFloatField;
+    QryProdutoMARCO: TFloatField;
+    QryProdutoABRIL: TFloatField;
+    QryProdutoMAIO: TFloatField;
+    QryProdutoJUNHO: TFloatField;
+    QryProdutoJULHO: TFloatField;
+    QryProdutoAGOSTO: TFloatField;
+    QryProdutoSETEMBRO: TFloatField;
+    QryProdutoOUTUBRO: TFloatField;
+    QryProdutoNOVEMBRO: TFloatField;
+    QryProdutoDEZEMBRO: TFloatField;
+    QryProdutoPRO_CODIGO: TIntegerField;
+    QryProdutoPRO_NOME: TStringField;
+    Panel1: TPanel;
+    DBGrid1: TDBGrid;
+    QryGeral: TFDQuery;
+    DTSGeral: TDataSource;
+    QryGeralJANEIRO: TFloatField;
+    QryGeralFEVEREIRO: TFloatField;
+    QryGeralMARCO: TFloatField;
+    QryGeralABRIL: TFloatField;
+    QryGeralMAIO: TFloatField;
+    QryGeralJUNHO: TFloatField;
+    QryGeralJULHO: TFloatField;
+    QryGeralAGOSTO: TFloatField;
+    QryGeralSETEMBRO: TFloatField;
+    QryGeralOUTUBRO: TFloatField;
+    QryGeralNOVEMBRO: TFloatField;
+    QryGeralDEZEMBRO: TFloatField;
+    DBGrid2: TDBGrid;
+    LABEL3: TLabel;
+    Label4: TLabel;
+    DtsCusto: TDataSource;
+    QryCusto: TFDQuery;
+    QryCustoJANEIRO: TFloatField;
+    QryCustoFEVEREIRO: TFloatField;
+    QryCustoMARCO: TFloatField;
+    QryCustoABRIL: TFloatField;
+    QryCustoMAIO: TFloatField;
+    QryCustoJUNHO: TFloatField;
+    QryCustoJULHO: TFloatField;
+    QryCustoAGOSTO: TFloatField;
+    QryCustoSETEMBRO: TFloatField;
+    QryCustoOUTUBRO: TFloatField;
+    QryCustoNOVEMBRO: TFloatField;
+    QryCustoDEZEMBRO: TFloatField;
+    DBGrid3: TDBGrid;
+    Label5: TLabel;
+    QryLucro: TFDQuery;
+    DTSLucro: TDataSource;
+    QryLucroJANEIRO: TFloatField;
+    QryLucroFEVEREIRO: TFloatField;
+    QryLucroMARCO: TFloatField;
+    QryLucroABRIL: TFloatField;
+    QryLucroMAIO: TFloatField;
+    QryLucroJUNHO: TFloatField;
+    QryLucroJULHO: TFloatField;
+    QryLucroAGOSTO: TFloatField;
+    QryLucroSETEMBRO: TFloatField;
+    QryLucroOUTUBRO: TFloatField;
+    QryLucroNOVEMBRO: TFloatField;
+    QryLucroDEZEMBRO: TFloatField;
+    procedure btnClienteClick(Sender: TObject);
+    procedure btnProdutoClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+    Cliente: TClienteDTO;
+    PodeEmitir: boolean;
+    ClienteDAO: TClienteDAO;
+    Produto: TProdutoDTO;
+    ProdutoDAO: TProdutoDAO;
+    MesAtual: Word;
+    DataInicio, DataFim: TDateTime;
+    tipo: Word;
+    RelatorioCliente : TRelatorioClienteDTO;
+    RelatorioProduto : TRelatorioProdutoDTO;
+
+    procedure carregar(Atipo:integer);
+    procedure VerificarFiltroDesejado;
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmPesRelatorio: TFrmPesRelatorio;
+
+implementation
+
+{$R *.dfm}
+
+uses uPesCliente, dmConexao, uPesProduto;
+
+procedure TFrmPesRelatorio.btnClienteClick(Sender: TObject);
+
+begin
+  try
+    FrmPesCliente := TFrmPesCliente.Create(Self,4);
+    ClienteDAO := TClienteDAO.create();
+    FrmPesCliente.ShowModal;
+  finally
+    if FrmPesCliente.ModalResult = mrOk then
+      Cliente := ClienteDAO.encontrarCliente(FrmPesCliente.QryPesquisaCLI_CODIGO.AsString);
+
+    FrmPesCliente.Free;
+  end;
+  if Assigned(Cliente) then
+  begin
+    Try
+      RelatorioCliente := TRelatorioClienteDTO.Create;
+      RelatorioCliente.Cliente := Cliente;
+    Finally
+      MesAtual := MonthOf(now);
+
+      RelatorioCliente.DataGeracao := Now;
+
+      VerificarFiltroDesejado;
+
+      RelatorioCliente.DataInicio := DataInicio;
+      RelatorioCliente.DataFim := DataFim;
+
+
+      if ChkSemestre.Checked then
+        tipo := 2
+      else
+        tipo := 1;
+
+      PodeEmitir := true;
+
+      carregar(tipo)
+    End;
+  end;
+
+end;
+
+procedure TFrmPesRelatorio.carregar(Atipo: integer);
+var
+  MesAtual :word;
+  AnoAtual :word;
+  i: integer;
+
+  function AdicionarRelatorioPorCliente: string;
+
+  begin
+    result := 'SELECT             '+
+                              '  cli_codigo,      '+
+                              '  cli_nome,        '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 1, mov_valorfinal, 0)) AS Janeiro,'+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 2, mov_valorfinal, 0)) AS Fevereiro, '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 3, mov_valorfinal, 0)) AS Marco,    '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 4, mov_valorfinal, 0)) AS Abril,    '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 5, mov_valorfinal, 0)) AS Maio,     '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 6, mov_valorfinal, 0)) AS Junho,    '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 7, mov_valorfinal, 0)) AS Julho,    '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 8, mov_valorfinal, 0)) AS Agosto,    '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 9, mov_valorfinal, 0)) AS Setembro,  '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 10, mov_valorfinal, 0)) AS Outubro,  '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 11, mov_valorfinal, 0)) AS Novembro, '+
+                              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 12, mov_valorfinal, 0)) AS Dezembro   '+
+                              'FROM                                           '+
+                              '  cliente                                       '+
+                              'JOIN                                            '+
+                              '  movimento ON mov_cliente = cli_codigo        '+
+
+                              'WHERE                                           '+
+                              '  EXTRACT(YEAR FROM mov_data) = '+AnoAtual.ToString+ ' AND        '+
+                              'CLI_CODIGO = '+Cliente.Codigo +
+                              'GROUP BY                                        '+
+                              '  cli_codigo, cli_nome  ';
+  end;
+
+  function AdicionarRelatorioPorProduto:String;
+  begin
+    result := 'SELECT   '+
+              'pro_codigo,    '+
+              'pro_nome,      '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 1, '+
+              ' mov_valorfinal, 0)) AS Janeiro,  '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 2, '+
+              ' mov_valorfinal, 0)) AS Fevereiro,  '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 3, '+
+              ' mov_valorfinal, 0)) AS Marco,     '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 4, '+
+              ' mov_valorfinal, 0)) AS Abril,     '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 5,'+
+              'mov_valorfinal, 0)) AS Maio,      '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 6,'+
+              'mov_valorfinal, 0)) AS Junho,     '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 7,'+
+              'mov_valorfinal, 0)) AS Julho,      '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 8,'+
+              'mov_valorfinal, 0)) AS Agosto,     '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 9,'+
+              'mov_valorfinal, 0)) AS Setembro,   '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 10,'+
+              'mov_valorfinal, 0)) AS Outubro,   '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 11,'+
+              'mov_valorfinal, 0)) AS Novembro,  '+
+              '  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 12,'+
+              'mov_valorfinal, 0)) AS Dezembro   '+
+              'FROM                                                         '+
+              '  produto                                                    '+
+              'JOIN                                                         '+
+              '  Movimentoitens ON mitens_produto = pro_codigo              '+
+              'JOIN                                                         '+
+              '  movimento ON mov_codigo = mitens_movimento                 '+
+              'WHERE                                                        '+
+              'EXTRACT(YEAR FROM mov_data) = 2023 AND PRO_CODIGO = '+Produto.Codigo+
+              'GROUP BY                                                     '+
+              '  pro_codigo,                                                '+
+              '  pro_nome ';
+
+  end;
+
+  procedure OcultarMesesSemestre(Grid:TDBGrid);
+  var i :integer;
+  begin
+    if MesAtual < 7 then
+      for I := 8 to 13 do
+        Grid.Columns.Items[i].Visible := false
+    else
+      for I := 2 to 7 do
+        Grid.Columns.Items[i].Visible := false;
+  end;
+
+
+begin
+  MesAtual := MonthOf(now);
+  AnoAtual := YearOf(now);
+
+  GridCliente.Visible := False;
+  GridProduto.Visible := false;
+
+
+  if ATipo = 1 then
+  begin
+    QryCliente.SQL.Clear;
+    QryCliente.SQL.Add(AdicionarRelatorioPorCliente);
+    QryCliente.Open();
+
+    GridCliente.Visible := true;
+  end
+  else
+  if Atipo = 2 then
+  begin
+    QryCliente.SQL.Clear;
+    QryCliente.SQL.Add(AdicionarRelatorioPorCliente);
+    QryCliente.Open();
+
+    GridCliente.Visible := true;
+
+    OcultarMesesSemestre(GridCliente);
+  end
+  else
+  if ATipo = 3 then
+  begin
+    QryProduto.SQL.Clear;
+    QryProduto.SQL.Add(AdicionarRelatorioPorProduto);
+    QryProduto.Open();
+    GridProduto.Visible := true;
+
+  end
+  else
+  if Atipo = 4 then
+  begin
+    QryProduto.SQL.Clear;
+    QryProduto.SQL.Add(AdicionarRelatorioPorProduto);
+    QryProduto.Open();
+
+    OcultarMesesSemestre(GridProduto);
+
+    GridProduto.Visible := true;
+  end;
+
+  VerificarFiltroDesejado;
+
+end;
+
+procedure TFrmPesRelatorio.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if key = #27 then
+    ModalResult := mrCancel;
+
+end;
+
+procedure TFrmPesRelatorio.FormShow(Sender: TObject);
+begin
+  QryCusto.SQL.Clear;
+  QryCusto.SQL.Add('SELECT  '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 1, ' +
+                   'mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Janeiro, '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 2,          '+
+                   'mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Fevereiro, '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 3,           '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Marco,    '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 4,           '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Abril,     '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 5,           '+
+                   'mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Maio,     '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 6,           '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Junho,    '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 7,            '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Julho,    '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 8,            '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Agosto,    '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 9,            '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Setembro,  '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 10,           '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Outubro,   '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 11,           '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Novembro,  '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 12,           '+
+                   ' mi.MITENS_QUANTIDADE * prod.PRO_CUSTO, 0)) AS Dezembro    '+
+                   'FROM                                                              '+
+                   '        MOVIMENTO mov                                             '+
+                   'JOIN                                                              '+
+                   '        MOVIMENTOITENS mi ON mov.MOV_CODIGO = mi.MITENS_MOVIMENTO '+
+                   'JOIN                                                              '+
+                   '        PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO       '+
+                   'WHERE                                                             '+
+                   '        EXTRACT(YEAR FROM mov.MOV_DATA) = 2023');
+  QryCusto.Open();
+
+  QryGeral.SQL.Clear;
+  QryGeral.SQL.Add('SELECT  SUM(IIF(EXTRACT(MONTH FROM mov_data) = 1, '+
+                   ' mov_valorfinal, 0)) AS Janeiro,                  '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 2,         '+
+                   ' mov_valorfinal, 0)) AS Fevereiro,                '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 3,         '+
+                   ' mov_valorfinal, 0)) AS Marco,                    '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 4,         '+
+                   ' mov_valorfinal, 0)) AS Abril,                    '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 5,         '+
+                   ' mov_valorfinal, 0)) AS Maio,                     '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 6,         '+
+                   ' mov_valorfinal, 0)) AS Junho,                    '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 7,         '+
+                   ' mov_valorfinal, 0)) AS Julho,                    '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 8,         '+
+                   ' mov_valorfinal, 0)) AS Agosto,                   '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 9,         '+
+                   ' mov_valorfinal, 0)) AS Setembro,                 '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 10,        '+
+                   ' mov_valorfinal, 0)) AS Outubro,                  '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 11,        '+
+                   ' mov_valorfinal, 0)) AS Novembro,                 '+
+                   'SUM(IIF(EXTRACT(MONTH FROM mov_data) = 12,        '+
+                   ' mov_valorfinal, 0)) AS Dezembro                  '+
+                   'FROM                                              '+
+                   'cliente                                           '+
+                   'JOIN                                              '+
+                   'movimento ON mov_cliente = cli_codigo             '+
+                   'WHERE                                             '+
+                   'EXTRACT(YEAR FROM mov_data) = 2023');
+  QryGeral.Open;
+
+  QryLucro.SQL.Clear;
+  QryLucro.SQL.Add('SELECT                        '+
+'    SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 1, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO) '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Janeiro,  '+
+'    SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 2, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO) '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro, '+
+'    SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 3, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)  '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,  '+
+'   SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 4, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)    '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,    '+
+'   SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 5, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)     '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,     '+
+'   SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 6, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)      '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,    '+
+'   SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 7, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)       '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,    '+
+'   SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 8, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)        '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,     '+
+'   SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 9, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)         '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,     '+
+'   SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 10, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)         '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,    '+
+'   SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 11, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)          '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Fevereiro,    '+
+'    SUM(IIF(EXTRACT(MONTH FROM mov.MOV_DATA) = 12, mov.MOV_VALORFINAL - COALESCE((SELECT SUM(mi.MITENS_QUANTIDADE * prod.PRO_CUSTO)          '+
+'FROM MOVIMENTOITENS mi JOIN PRODUTO prod ON prod.PRO_CODIGO = mi.MITENS_PRODUTO WHERE mi.MITENS_MOVIMENTO = mov.MOV_CODIGO), 0), 0)) AS Dezembro     '+
+'FROM             '+
+'    MOVIMENTO mov  '+
+'WHERE               '+
+'    EXTRACT(YEAR FROM mov.MOV_DATA) = 2023 ');
+QryLucro.Open();
+
+end;
+
+procedure TFrmPesRelatorio.VerificarFiltroDesejado;
+begin
+  if ChkSemestre.Checked then
+      begin
+        if MesAtual < 7 then
+        begin
+          DataInicio := EncodeDate(YearOf(Now), 1, 1);  // 1 de janeiro do ano atual
+          DataFim := EncodeDate(YearOf(Now), 6, 30);    // 30 de junho do ano atual
+
+        end
+        else
+        begin
+          DataInicio := EncodeDate(YearOf(Now), 7, 1);  // 1 de julho do ano atual
+          DataFim := EncodeDate(YearOf(Now), 12, 31);   // 31 de dezembro do ano atual
+        end;
+      end
+      else
+      if ChkAnual.Checked then
+      begin
+        DataInicio := EncodeDate(YearOf(Now),1,1);
+        DataFim    := EncodeDate(YearOf(Now), 12, 31);
+      end
+      else
+      if ChkCustomizada.Checked then
+      begin
+        DataInicio := EncodeDate(StrToInt(copy(Edt_dataInicio.Text,7,4)), StrToInt(copy(Edt_dataInicio.Text,4,2)), StrToInt(copy(Edt_dataInicio.Text,1,2)));
+        DataFim := EncodeDate(StrToInt(copy(Edt_dataFim.Text,7,4)), StrToInt(copy(Edt_dataFim.Text,4,2)), StrToInt(copy(Edt_dataFim.Text,1,2)));
+      end;
+end;
+
+procedure TFrmPesRelatorio.btnProdutoClick(Sender: TObject);
+begin
+  try
+    FrmPesProduto := TFrmPesProduto.Create(Self);
+    ProdutoDAO := TProdutoDAO.create(1);
+    FrmPesProduto.ShowModal;
+  finally
+    if FrmPesProduto.ModalResult = MrOk then
+      Produto := ProdutoDAO.EncontrarProduto(FrmPesProduto.QryPesquisaPRO_CODIGO.AsString);
+    FrmPesProduto.Free;
+  end;
+
+  if Assigned(Produto) then
+  begin
+    try
+      RelatorioProduto := TRelatorioProdutoDTO.Create;
+      RelatorioProduto.Produto := Produto;
+
+      if ChkSemestre.Checked then
+        tipo := 4
+      else
+        tipo := 3;
+      VerificarFiltroDesejado;
+      carregar(tipo);
+    finally
+
+    end;
+  end;
+end;
+
+end.

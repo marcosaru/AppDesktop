@@ -1,0 +1,21 @@
+unit PagamentoDTO;
+
+interface
+  uses
+    CondicoesDTO,FormaPagtoDTO;
+  type
+    TPagamentoDTO = class
+      Private
+        FCodigo: String;
+        FCondicao : TCondicoesDTO;
+        FForma : TFormaPagtoDTO;
+      public
+        Property Codigo: String Read FCodigo Write FCodigo;
+        Property Condicao: TCondicoesDTO Read FCondicao Write FCondicao;
+        Property FormaPagto: TFormaPagtoDTO read FForma Write FForma;
+    end;
+
+
+implementation
+
+end.

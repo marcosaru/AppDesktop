@@ -1,0 +1,65 @@
+unit uPesTransportador;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client;
+
+type
+  TFrmPesTransportador = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnCadastrar: TButton;
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    Grid: TDBGrid;
+    DataSource1: TDataSource;
+    QryPesquisa: TFDQuery;
+    QryPesquisaTRANS_CODIGO: TIntegerField;
+    QryPesquisaTRANS_TELEFONE: TStringField;
+    QryPesquisaTRANS_NOME: TStringField;
+    QryPesquisaTRANS_ENDERECO: TStringField;
+    QryPesquisaTRANS_MUNICIPIO: TIntegerField;
+    QryPesquisaMUN_NOME: TStringField;
+  private
+    { Private declarations }
+    procedure AbrirCadastro(ACodigo:Integer);
+    procedure Carregar;
+    Procedure Limpar;
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmPesTransportador: TFrmPesTransportador;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao;
+
+{ TFrmPesTransportador }
+
+procedure TFrmPesTransportador.AbrirCadastro(ACodigo: Integer);
+begin
+
+end;
+
+procedure TFrmPesTransportador.Carregar;
+begin
+
+end;
+
+procedure TFrmPesTransportador.Limpar;
+begin
+
+end;
+
+end.

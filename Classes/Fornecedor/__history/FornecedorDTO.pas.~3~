@@ -1,0 +1,21 @@
+unit FornecedorDTO;
+
+interface
+uses MunicipioDTO;
+  type
+    TFornecedorDTO = class
+      private
+        FCodigo:String;
+        FNome:String;
+        FMunicipio:TMunicipioDTO;
+      public
+        property Codigo:String read FCodigo Write FCodigo;
+        property Nome: String read FNome Write FNome;
+        property Municipio: TMunicipioDTO read FMunicipio write FMunicipio;
+  end;
+
+implementation
+
+
+
+end.

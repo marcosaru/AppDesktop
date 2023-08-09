@@ -1,0 +1,67 @@
+unit uCadPagamento;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,PagamentosMovimentoDAO, PagamentosMovimentoDTO,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, uCurrencyEditVCL, Vcl.Mask;
+
+type
+  TFrmCadRecebimento = class(TForm)
+    CurrencyEdit1: TCurrencyEdit;
+    Edt_Codigo: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Edt_DataCompra: TMaskEdit;
+    MaskEdit1: TMaskEdit;
+    Label4: TLabel;
+    MaskEdit2: TMaskEdit;
+    Label5: TLabel;
+    Edt_Obs: TMemo;
+    Label6: TLabel;
+    btnConfirmar: TButton;
+    BtnCancelar: TButton;
+    procedure FormShow(Sender: TObject);
+    procedure BtnCancelarClick(Sender: TObject);
+  private
+    { Private declarations }
+    Pagamento : TPagamentosMovimentoDTO;
+    PagamentoDAO : TPagamentosMovimentoDAO;
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmCadRecebimento: TFrmCadRecebimento;
+
+implementation
+
+{$R *.dfm}
+
+uses uPesVencimentos;
+
+procedure TFrmCadRecebimento.BtnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmCadRecebimento.FormShow(Sender: TObject);
+begin
+  Try
+    PagamentoDAO := TPagamentosMovimentoDAO.Create;
+    Pagamento := PagamentoDAO.Encontrar(FrmPesVencimentos.QryPesquisaPAG_CODIGO.AsInteger);
+
+    if Assigned(Pagamento) then
+    begin
+      Edt_Codigo.Text := Pagamento.Codigo.ToString;
+
+    end;
+
+  Finally
+
+  End;
+end;
+
+end.

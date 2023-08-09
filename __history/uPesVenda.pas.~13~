@@ -1,0 +1,89 @@
+unit uPesVenda;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  FireDAC.Comp.Client, frxClass, frxDBSet, frCoreClasses;
+
+type
+  TFrmPesVenda = class(TForm)
+    pnlMain: TPanel;
+    pnlBotoes: TPanel;
+    btnCadastrar: TButton;
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    GridPesquisaVendas: TDBGrid;
+    DTSVenda: TDataSource;
+    QryPesquisa: TFDQuery;
+    RelVenda: TfrxReport;
+    RelDTSVenda: TfrxDBDataset;
+    QryPesquisaMOV_CODIGO: TIntegerField;
+    QryPesquisaCLI_NOME: TStringField;
+    QryPesquisaMOV_DATA: TSQLTimeStampField;
+    QryPesquisaMOV_TIPO: TIntegerField;
+    QryPesquisaMOV_TOTALPRODUTOS: TFloatField;
+    QryPesquisaMOV_TOTALSERVICOS: TFloatField;
+    QryPesquisaMOV_ACRESCIMO: TFloatField;
+    QryPesquisaMOV_DESCONTO: TFloatField;
+    QryPesquisaMOV_FRETE: TFloatField;
+    QryPesquisaMOV_QTDEITENS: TSingleField;
+    QryPesquisaMOV_VALORFINAL: TFloatField;
+    btnFiltrar: TButton;
+    procedure FormShow(Sender: TObject);
+    procedure btnFiltrarClick(Sender: TObject);
+  private
+    { Private declarations }
+
+  public
+    { Public declarations }
+    procedure carrega(ACodigo: Integer = 0);
+  end;
+
+var
+  FrmPesVenda: TFrmPesVenda;
+
+implementation
+
+{$R *.dfm}
+
+uses dmConexao, uFiltroVenda;
+
+procedure TFrmPesVenda.btnFiltrarClick(Sender: TObject);
+begin
+  try
+    FrmFiltro := TFrmFiltro.Create(Self);
+    FrmFiltro.ShowModal;
+  finally
+    FrmFiltro.free;
+  end;
+end;
+
+procedure TFrmPesVenda.carrega(ACodigo: Integer = 0);
+begin
+  QryPesquisa.SQL.Clear;
+  QryPesquisa.SQL.Add('select mov_codigo,cli_nome,mov_data,mov_tipo,mov_totalProdutos, '+
+                      'mov_totalservicos,mov_acrescimo,mov_desconto,          '+
+                      'mov_frete,mov_qtdeitens,mov_valorfinal from movimento '+
+                      'join cliente on cli_codigo = mov_cliente ');
+
+  if ACodigo > 0 then
+  begin
+    QryPesquisa.SQL.Add('where mov_codigo = :codigo');
+
+    QryPesquisa.ParamByName('codigo').AsInteger := ACodigo;
+  end;
+  QryPesquisa.Open();
+end;
+
+procedure TFrmPesVenda.FormShow(Sender: TObject);
+begin
+  carrega;
+end;
+
+end.

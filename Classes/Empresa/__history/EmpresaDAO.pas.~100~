@@ -1,0 +1,189 @@
+unit EmpresaDAO;
+
+interface
+uses EmpresaDTO,FireDAC.Stan.Intf, FireDAC.Stan.Option,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client,Vcl.Dialogs,BairroDTO,BairroDAO;
+  Type
+    TEmpresaDAO = class
+    private
+      QryCadastro : TFDQuery;
+      QryPesquisa : TFDQuery;
+      QryAux      : TFDQuery;
+      Bairro      : TBairroDTO;
+      BairroDAO   : TBairroDAO;
+      Empresa     : TEmpresaDTO;
+      FStatus     : integer;
+    public
+      function salvar(Empresa:TEmpresaDTO): boolean;
+      function alterar(Empresa:TEmpresaDTO): Boolean;
+      Function Encontrar(ACodigo:String): TEmpresaDTO;
+      constructor create;
+      destructor destroy;
+    end;
+
+implementation
+
+{ TEmpresaDAO }
+
+uses dmConexao,System.Classes, System.SysUtils, System.Variants;
+
+function TEmpresaDAO.alterar(Empresa: TEmpresaDTO): Boolean;
+begin
+  FStatus:= 2;
+  salvar(Empresa);
+end;
+
+constructor TEmpresaDAO.create;
+begin
+  QryCadastro := TFDQuery.Create(nil);
+  QryPesquisa := TFDQuery.Create(nil);
+  QryAux      := TFDQuery.Create(nil);
+  Empresa     := TEmpresaDTO.Create;
+
+  Bairro      := TBairroDTO.Create;
+  BairroDAO   := TBairroDAO.create;
+
+  QryCadastro.Connection := fdmConexao.BANCO;
+  QryPesquisa.Connection := fdmConexao.BANCO;
+  QryAux.Connection := fdmConexao.BANCO;
+
+end;
+
+destructor TEmpresaDAO.destroy;
+begin
+  FreeAndNil(Bairro);
+  FreeAndNil(BairroDAO);
+  FreeAndNil(Empresa);
+  FreeAndNil(QryCadastro);
+  FreeAndNil(QryPesquisa);
+  FreeAndNil(QryAux);
+
+  inherited;
+end;
+
+function TEmpresaDAO.Encontrar(ACodigo: String): TEmpresaDTO;
+var
+  LogoSize: Integer;
+  LogoStream: TMemoryStream;
+  LogoData: TBytes;
+
+begin
+  QryPesquisa.SQL.Clear;
+  QryPesquisa.SQL.Add('Select * from empresa where emp_codigo = '+ACodigo);
+  QryPesquisa.Open;
+
+  if QryPesquisa.RecordCount > 0 then
+  begin
+    Bairro         := BairroDAO.Encontrar(QryPesquisa.FieldByName('Emp_Bairro').AsString);
+    LogoStream := TMemoryStream.Create;
+
+    if not QryPesquisa.FieldByName('Emp_Logo').IsNull then
+    begin
+      TBlobField(QryPesquisa.FieldByName('Emp_Logo')).SaveToStream(LogoStream);
+      LogoStream.Position := 0;
+      LogoSize := LogoStream.Size;
+      Empresa  := TEmpresaDTO.Create;
+      Empresa.definirTamanho(LogoSize);
+
+      LogoStream.ReadBuffer(Empresa.Logo[0], Length(Empresa.Logo));
+      Empresa.LogoStream := LogoStream;
+
+      Empresa.Codigo := QryPesquisa.FieldByName('Emp_Codigo').AsString;
+      Empresa.Nome   := QryPesquisa.FieldByName('Emp_Nome').AsString;
+      Empresa.CNPJ   := QryPesquisa.FieldByName('Emp_CNPJ').AsString;
+      Empresa.Bairro := Bairro;
+      Empresa.Municipio := Bairro.Municipio;
+      Empresa.Endereco := QryPesquisa.FieldByName('Emp_Endereco').AsString;
+      Empresa.Inscricao := QryPesquisa.FieldByName('Emp_Inscricao').AsString;
+      Empresa.Fantasia := QryPesquisa.FieldByName('Emp_Fantasia').AsString;
+      Empresa.Fundacao := QryPesquisa.FieldByName('Emp_Fundacao').AsDateTime;
+      Empresa.Email := QryPesquisa.FieldByName('Emp_Email').AsString;
+
+      result := Empresa;
+    end
+    else
+    begin
+      Empresa  := TEmpresaDTO.Create;
+      Empresa.Codigo := QryPesquisa.FieldByName('Emp_Codigo').AsString;
+      Empresa.Nome   := QryPesquisa.FieldByName('Emp_Nome').AsString;
+      Empresa.CNPJ   := QryPesquisa.FieldByName('Emp_CNPJ').AsString;
+      Empresa.Bairro := Bairro;
+      Empresa.Municipio := Bairro.Municipio;
+      Empresa.Endereco := QryPesquisa.FieldByName('Emp_Endereco').AsString;
+      Empresa.Inscricao := QryPesquisa.FieldByName('Emp_Inscricao').AsString;
+      Empresa.Fantasia := QryPesquisa.FieldByName('Emp_Fantasia').AsString;
+      Empresa.Fundacao := QryPesquisa.FieldByName('Emp_Fundacao').AsDateTime;
+      Empresa.Email := QryPesquisa.FieldByName('Emp_Email').AsString;
+    end;
+
+  end
+  else result := nil;
+end;
+
+function TEmpresaDAO.salvar(Empresa: TEmpresaDTO): boolean;
+var
+  ParamLogo: TParam;
+  Stream: TMemoryStream;
+begin
+  try
+    QryCadastro.SQL.Clear;
+    ParamLogo := TParam.Create(nil);
+    Stream := TMemoryStream.Create;
+
+    if fdmConexao.BANCO.InTransaction then
+        fdmConexao.BANCO.Rollback;
+
+    fdmConexao.BANCO.StartTransaction;
+
+    if FStatus in [0,1]  then
+      QryCadastro.SQL.Add('INSERT INTO EMPRESA (EMP_CODIGO,EMP_NOME, '+
+                          'EMP_CNPJ,EMP_BAIRRO,EMP_MUNICIPIO,EMP_ENDERECO, '+
+                          'EMP_INSCRICAO, EMP_FANTASIA,EMP_FUNDACAO,EMP_LOGO,EMP_EMAIL) '+
+                          ' VALUES (:EMP_CODIGO,:EMP_NOME, '+
+                          ':EMP_CNPJ,:EMP_BAIRRO,:EMP_MUNICIPIO,:EMP_ENDERECO, '+
+                          ':EMP_INSCRICAO, :EMP_FANTASIA, :EMP_FUNDACAO, :EMP_LOGO,:EMP_EMAIL)')
+    else
+    if FStatus = 2 then
+      QryCadastro.SQL.Add('UPDATE EMPRESA SET ' +
+                            'EMP_NOME = :EMP_NOME, ' +
+                            'EMP_CNPJ = :EMP_CNPJ, ' +
+                            'EMP_BAIRRO = :EMP_BAIRRO, ' +
+                            'EMP_MUNICIPIO = :EMP_MUNICIPIO, ' +
+                            'EMP_ENDERECO = :EMP_ENDERECO, ' +
+                            'EMP_INSCRICAO = :EMP_INSCRICAO, ' +
+                            'EMP_FANTASIA = :EMP_FANTASIA, ' +
+                            'EMP_FUNDACAO = :EMP_FUNDACAO, ' +
+                            'EMP_LOGO = :EMP_LOGO, ' +
+                            'EMP_EMAIL = :EMP_EMAIL  '+
+                            'WHERE EMP_CODIGO = 1');
+    if FStatus = 2 then
+      QryCadastro.Params.ParamByName('EMP_CODIGO').AsString := '1';
+    QryCadastro.Params.ParamByName('EMP_NOME').AsString := Empresa.Nome;
+    QryCadastro.Params.ParamByName('EMP_CNPJ').AsString := Empresa.CNPJ;
+    QryCadastro.Params.ParamByName('EMP_BAIRRO').AsString := Empresa.Bairro.Codigo;
+    QryCadastro.Params.ParamByName('EMP_MUNICIPIO').AsString := Empresa.Municipio.Codigo;
+    QryCadastro.Params.ParamByName('EMP_ENDERECO').AsString := Empresa.Endereco;
+    QryCadastro.Params.ParamByName('EMP_INSCRICAO').AsString := Empresa.Inscricao;
+    QryCadastro.Params.ParamByName('EMP_FANTASIA').AsString := Empresa.Fantasia;
+    QryCadastro.Params.ParamByName('EMP_FUNDACAO').AsDateTime := Empresa.Fundacao;
+    QryCadastro.Params.ParamByName('EMP_EMAIL').AsDateTime := Empresa.Fundacao;
+
+    Stream.WriteBuffer(Empresa.Logo[0], Length(Empresa.Logo));
+    Stream.Position := 0;
+
+    QryCadastro.Params.ParamByName('EMP_LOGO').LoadFromStream(Stream, ftBlob);
+
+    QryCadastro.ExecSQL;
+    fdmConexao.BANCO.Commit;
+
+    result := true;
+  except
+
+    result := false;
+  end;
+
+end;
+
+end.

@@ -1,0 +1,13 @@
+unit BairroDTO;
+
+interface
+
+  TBairroDTO = class
+    Fnome : string;
+    FEstado : string;
+    s
+  end;
+
+implementation
+
+end.

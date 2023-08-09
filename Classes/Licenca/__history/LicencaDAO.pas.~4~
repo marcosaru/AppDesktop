@@ -1,0 +1,47 @@
+unit LicencaDAO;
+
+interface
+
+uses
+  LicencaDTO, System.SysUtils, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+    FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+    FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
+    FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+
+type
+  TLicencaDAO = class
+  public
+    function GetLicenca(Chave: string): TLicencaDTO;
+  end;
+
+implementation
+
+uses dmConexao;
+
+function TLicencaDAO.GetLicenca(Chave: string): TLicencaDTO;
+var
+  SQLQuery: TFDQuery;
+begin
+  SQLQuery := TSQLQuery.Create(nil);
+  try
+    SQLQuery.C := fdmConexao.BANCO; // Adicione aqui a conexão com o seu banco de dados
+    SQLQuery.SQL.Add('SELECT * FROM Licenca WHERE Chave = :Chave');
+    SQLQuery.ParamByName('Chave').AsString := Chave;
+    SQLQuery.Open;
+
+    if not SQLQuery.IsEmpty then
+    begin
+      Result := TLicencaDTO.Create;
+      Result.Id := SQLQuery.FieldByName('Id').AsInteger;
+      Result.Chave := SQLQuery.FieldByName('Chave').AsString;
+      Result.DataExpiracao := SQLQuery.FieldByName('DataExpiracao').AsDateTime;
+    end
+    else
+      Result := nil;
+  finally
+    SQLQuery.Free;
+  end;
+end;
+
+end.
+

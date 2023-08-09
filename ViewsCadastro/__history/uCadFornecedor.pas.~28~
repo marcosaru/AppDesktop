@@ -1,0 +1,241 @@
+unit uCadFornecedor;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,MunicipioDTO,
+  FornecedorDTO,FornecedorDAO,MunicipioDAO,TransportadorDTO,TransportadorDAO;
+
+type
+  TFrmCadFornecedor = class(TForm)
+    pnlCadastro: TPanel;
+    Panel2: TPanel;
+    Edt_Codigo: TEdit;
+    Edt_Nome: TEdit;
+    btnConfirmar: TButton;
+    btnCancelar: TButton;
+    Código: TLabel;
+    Nome: TLabel;
+    Municipio: TLabel;
+    Edt_CodigoMunicipio: TEdit;
+    Edt_Municipio: TEdit;
+    btnProcurarMunicipio: TButton;
+    Edt_representante: TEdit;
+    Label1: TLabel;
+    Edt_CodigoTransportador: TEdit;
+    Edt_Transportador: TEdit;
+    btnProcurarTransportador: TButton;
+    Label2: TLabel;
+    procedure btnProcurarMunicipioClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnConfirmarClick(Sender: TObject);
+    procedure confirma;
+    procedure btnCancelarClick(Sender: TObject);
+    procedure btnProcurarTransportadorClick(Sender: TObject);
+    procedure Edt_CodigoTransportadorKeyPress(Sender: TObject; var Key: Char);
+    procedure Edt_CodigoMunicipioKeyPress(Sender: TObject; var Key: Char);
+  private
+    { Private declarations }
+    FStatus:integer;
+    MunicipioEncontrado  : TMunicipioDTO;
+    MunicipioDAO : TMunicipioDAO;
+    FornecedorDTO : TFornecedorDTO;
+    Transportador : TTransportadorDTO;
+    TransportadorDAO : TTransportadorDAO;
+    FornecedorDAO : TFornecedorDAO;
+    procedure controlarStatus;
+    procedure limpar;
+    procedure carregar(ACodigo:String);
+
+  public
+    { Public declarations }
+    Constructor create(AOwner:TComponent;ACodigo:Integer);overload;
+    Destructor destroy;
+
+  end;
+
+var
+  FrmCadFornecedor: TFrmCadFornecedor;
+
+implementation
+
+{$R *.dfm}
+
+uses uPesMunicipio, dmConexao, uPesFornecedores, uPesTransportador;
+
+procedure TFrmCadFornecedor.btnCancelarClick(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TFrmCadFornecedor.btnConfirmarClick(Sender: TObject);
+begin
+  confirma;
+end;
+
+procedure TFrmCadFornecedor.btnProcurarMunicipioClick(Sender: TObject);
+begin
+  try
+    FrmPesMunicipio := TFrmPesMunicipio.Create(Self);
+    FrmPesMunicipio.ShowModal;
+  finally
+    if FrmPesMunicipio.ModalResult = mrOk then
+    begin
+      Edt_CodigoMunicipio.Text := FrmPesMunicipio.QryPesquisaMUN_CODIGO.AsString;
+      Edt_Municipio.Text       := FrmPesMunicipio.QryPesquisaMUN_NOME.AsString;
+    end;
+    FrmPesMunicipio.Free;
+  end;
+end;
+
+procedure TFrmCadFornecedor.btnProcurarTransportadorClick(Sender: TObject);
+begin
+  Try
+    FrmPesTransportador := TFrmPesTransportador.Create(Self);
+    FrmPesTransportador.ShowModal;
+  Finally
+    if FrmPesTransportador.ModalResult = MrOk then
+    begin
+      Edt_Transportador.Text := FrmPesTransportador.QryPesquisaTRANS_NOME.AsString;
+      Edt_CodigoTransportador.Text := FrmPesTransportador.QryPesquisaTRANS_Codigo.AsString;
+    end;
+    FrmPesTransportador.Free;
+  End;
+end;
+
+procedure TFrmCadFornecedor.carregar(ACodigo:String);
+begin
+  FornecedorDTO := FornecedorDAO.EncontrarFornecedor(ACodigo);
+  if Assigned(FornecedorDTO) then
+  begin
+    Transportador := TransportadorDAO.Encontrar(Edt_CodigoTransportador.Text);
+
+    Edt_Codigo.Text              := FornecedorDTO.Codigo;
+    Edt_Nome.Text                := FornecedorDTO.Nome;
+    Edt_Municipio.Text           := FornecedorDTO.Municipio.Nome;
+    Edt_CodigoMunicipio.Text     := FornecedorDTO.Municipio.Codigo;
+    Edt_Transportador.Text       := FornecedorDTO.Transportador.Nome;
+    Edt_CodigoTransportador.Text := FornecedorDTO.Transportador.Codigo;
+    Edt_representante.Text       := FornecedorDTO.Responsavel;
+  end;
+end;
+
+procedure TFrmCadFornecedor.confirma;
+begin
+  FornecedorDTO.Codigo           :=  Edt_Codigo.Text;
+  FornecedorDTO.Nome             :=  Edt_Nome.Text;
+  FornecedorDTO.Municipio        :=  MunicipioDAO.Encontrar(Edt_CodigoMunicipio.Text);
+  FornecedorDTO.Transportador    := TransportadorDAO.
+
+  if Fstatus in [0,1] then
+    FornecedorDAO.salvar(FornecedorDTO)
+  else
+  if FStatus = 2 then
+    FornecedorDAO.Alterar(FornecedorDTO);
+  if MessageDlg('Deseja Incluir mais um registro?',mtConfirmation,[mbYes,mbNo],0) = mrYes then
+  begin
+    limpar;
+    Edt_Codigo.Text := fdmConexao.retornaCodigoMaximo('FOR_CODIGO','FORNECEDOR');
+  end
+  else
+    ModalResult := mrOk;
+end;
+
+procedure TFrmCadFornecedor.controlarStatus;
+begin
+  pnlCadastro.Enabled := Fstatus <> 3;
+  btnConfirmar.Enabled := Fstatus <>3;
+end;
+
+constructor TFrmCadFornecedor.create(AOwner: TComponent; ACodigo: Integer);
+begin
+  inherited create(AOwner);
+  FornecedorDTO := TFornecedorDTO.Create;
+  FornecedorDAO := TFornecedorDAO.Create;
+  MunicipioDAO  := TMunicipioDAO.Create;
+  MunicipioEncontrado     := TMunicipioDTO.Create;
+  TransportadorDAO := TTransportadorDAO.create;
+  FStatus       := ACodigo;
+end;
+
+destructor TFrmCadFornecedor.destroy;
+begin
+  FreeAndNil(MunicipioEncontrado);
+   FornecedorDTO.Free;
+   FornecedorDAO.Free;
+   inherited;
+end;
+procedure TFrmCadFornecedor.Edt_CodigoMunicipioKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if Key  = #13 then
+  begin
+    try
+      MunicipioEncontrado := MunicipioDAO.Encontrar(Edt_CodigoMunicipio.Text);
+
+      if Assigned(MunicipioEncontrado) then
+      begin
+        Edt_Municipio.Text := MunicipioEncontrado.Nome;
+        Edt_CodigoMunicipio.Text := MunicipioEncontrado.Codigo;
+      end
+      else
+        ShowMessage('Não foi encontrado nenhum municipio, tente outro código ou use a busca');
+    finally
+
+    end;
+  end;
+end;
+
+procedure TFrmCadFornecedor.Edt_CodigoTransportadorKeyPress(Sender: TObject;
+  var Key: Char);
+var
+  Transportador: TTransportadorDTO;
+  TransportadorDAO: TTransportadorDAO;
+begin
+  if key = #13 then
+  begin
+    try
+      TransportadorDAO := TTransportadorDAO.create;
+      Transportador := TransportadorDAO.Encontrar(Edt_CodigoTransportador.Text);
+      if Assigned(Transportador) then
+        Edt_Transportador.Text := Transportador.Nome
+      else
+        ShowMessage('Nenhum transportador foi localizado, por favor insira outro código.');
+    finally
+      Transportador.Free;
+      TransportadorDAO.Free;
+    end;
+  end;
+end;
+
+procedure TFrmCadFornecedor.FormShow(Sender: TObject);
+begin
+  if Fstatus = 1 then
+  begin
+    limpar;
+    Edt_Codigo.Text := fdmConexao.retornaCodigoMaximo('FOR_CODIGO','FORNECEDOR');
+    Edt_Nome.SetFocus;
+  end
+  else
+  if FStatus = 2 then
+  begin
+    carregar(FrmPesFornecedor.QryPesquisaFOR_CODIGO.AsString);
+    Edt_Nome.SetFocus;
+  end
+  else
+  if FStatus = 3 then
+    carregar(FrmPesFornecedor.QryPesquisaFOR_CODIGO.AsString);
+
+  controlarStatus;
+
+end;
+
+procedure TFrmCadFornecedor.limpar;
+begin
+  Edt_Nome.Text := '';
+  Edt_Municipio.Text := '';
+  Edt_CodigoMunicipio.Text := '';
+end;
+
+end.

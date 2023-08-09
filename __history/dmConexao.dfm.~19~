@@ -1,0 +1,69 @@
+object fdmConexao: TfdmConexao
+  OldCreateOrder = False
+  Height = 260
+  Width = 323
+  object BANCO: TFDConnection
+    Params.Strings = (
+      'Database=C:\Delphi\Win32\Debug\Banco\BANCO.FDB'
+      'User_Name=SYSDBA'
+      'Password=masterkey'
+      'CharacterSet=WIN1252'
+      'DriverID=IB')
+    LoginPrompt = False
+    Left = 24
+    Top = 24
+  end
+  object FDTransaction1: TFDTransaction
+    Connection = BANCO
+    Left = 88
+    Top = 24
+  end
+  object QryCadastro: TFDQuery
+    Connection = BANCO
+    Left = 144
+    Top = 24
+  end
+  object QryAux: TFDQuery
+    Connection = BANCO
+    Left = 184
+    Top = 24
+  end
+  object QryBusca: TFDQuery
+    Connection = BANCO
+    Left = 224
+    Top = 24
+  end
+  object QryItensMovimento: TFDQuery
+    Connection = BANCO
+    SQL.Strings = (
+      'select mitens_movimento,mitens_produto,'
+      'pro_nome,pro_valorvenda '
+      'from movimentoitens'
+      'Join produto on pro_codigo = mitens_produto')
+    Left = 144
+    Top = 88
+    object QryItensMovimentoMITENS_MOVIMENTO: TIntegerField
+      FieldName = 'MITENS_MOVIMENTO'
+      Origin = 'MITENS_MOVIMENTO'
+    end
+    object QryItensMovimentoMITENS_PRODUTO: TIntegerField
+      FieldName = 'MITENS_PRODUTO'
+      Origin = 'MITENS_PRODUTO'
+    end
+    object QryItensMovimentoPRO_NOME: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'PRO_NOME'
+      Origin = 'PRO_NOME'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 100
+    end
+    object QryItensMovimentoPRO_VALORVENDA: TIntegerField
+      AutoGenerateValue = arDefault
+      FieldName = 'PRO_VALORVENDA'
+      Origin = 'PRO_VALORVENDA'
+      ProviderFlags = []
+      ReadOnly = True
+    end
+  end
+end

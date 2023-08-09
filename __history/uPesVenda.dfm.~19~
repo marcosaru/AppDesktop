@@ -1,0 +1,256 @@
+object FrmPesVenda: TFrmPesVenda
+  Left = 0
+  Top = 0
+  Caption = 'Vendas'
+  ClientHeight = 565
+  ClientWidth = 998
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pnlMain: TPanel
+    Left = 0
+    Top = 0
+    Width = 894
+    Height = 565
+    Align = alClient
+    TabOrder = 0
+    ExplicitLeft = -8
+    ExplicitWidth = 553
+    ExplicitHeight = 441
+    object GridPesquisaVendas: TDBGrid
+      Left = 1
+      Top = 1
+      Width = 892
+      Height = 563
+      Align = alClient
+      DataSource = DTSVenda
+      TabOrder = 0
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -11
+      TitleFont.Name = 'Tahoma'
+      TitleFont.Style = []
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'MOV_CODIGO'
+          Title.Caption = 'C'#211'DIGO'
+          Width = 51
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'CLI_NOME'
+          Title.Caption = 'CLIENTE'
+          Width = 300
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MOV_DATA'
+          Title.Caption = 'DATA'
+          Width = 93
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MOV_TOTALPRODUTOS'
+          Title.Caption = 'PRODUTOS'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MOV_TOTALSERVICOS'
+          Title.Caption = 'SERVI'#199'OS'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MOV_ACRESCIMO'
+          Title.Caption = 'ACR'#201'SCIMO'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MOV_DESCONTO'
+          Title.Caption = 'DESCONTO'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MOV_FRETE'
+          Title.Caption = 'FRETE'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MOV_QTDEITENS'
+          Title.Caption = 'QTDE ITENS'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MOV_VALORFINAL'
+          Title.Caption = 'TOTAL'
+          Visible = True
+        end>
+    end
+  end
+  object pnlBotoes: TPanel
+    Left = 894
+    Top = 0
+    Width = 104
+    Height = 565
+    Align = alRight
+    BevelOuter = bvNone
+    TabOrder = 1
+    ExplicitLeft = 544
+    ExplicitHeight = 439
+    object btnCadastrar: TButton
+      Left = 16
+      Top = 24
+      Width = 75
+      Height = 25
+      Caption = 'Cadastrar'
+      TabOrder = 0
+    end
+    object Button1: TButton
+      Left = 16
+      Top = 55
+      Width = 75
+      Height = 25
+      Caption = 'Alterar'
+      TabOrder = 1
+    end
+    object Button2: TButton
+      Left = 16
+      Top = 86
+      Width = 75
+      Height = 25
+      Caption = 'Apresentar'
+      TabOrder = 2
+    end
+    object Button3: TButton
+      Left = 16
+      Top = 197
+      Width = 75
+      Height = 25
+      Caption = 'Cancelar'
+      TabOrder = 3
+    end
+    object btnFiltrar: TButton
+      Left = 16
+      Top = 148
+      Width = 75
+      Height = 25
+      Caption = 'Filtrar'
+      TabOrder = 4
+      OnClick = btnFiltrarClick
+    end
+  end
+  object DTSVenda: TDataSource
+    DataSet = QryPesquisa
+    Left = 896
+    Top = 288
+  end
+  object QryPesquisa: TFDQuery
+    Connection = fdmConexao.BANCO
+    SQL.Strings = (
+      'select mov_codigo,cli_nome,mov_data,mov_tipo,mov_totalProdutos,'
+      'mov_totalservicos,mov_acrescimo,mov_desconto,'
+      'mov_frete,mov_qtdeitens,mov_valorfinal from movimento'
+      'join cliente on cli_codigo = mov_cliente')
+    Left = 946
+    Top = 288
+    object QryPesquisaMOV_CODIGO: TIntegerField
+      FieldName = 'MOV_CODIGO'
+      Origin = 'MOV_CODIGO'
+      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
+      Required = True
+    end
+    object QryPesquisaCLI_NOME: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'CLI_NOME'
+      Origin = 'CLI_NOME'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 255
+    end
+    object QryPesquisaMOV_DATA: TSQLTimeStampField
+      FieldName = 'MOV_DATA'
+      Origin = 'MOV_DATA'
+    end
+    object QryPesquisaMOV_TIPO: TIntegerField
+      FieldName = 'MOV_TIPO'
+      Origin = 'MOV_TIPO'
+    end
+    object QryPesquisaMOV_TOTALPRODUTOS: TFloatField
+      FieldName = 'MOV_TOTALPRODUTOS'
+      Origin = 'MOV_TOTALPRODUTOS'
+    end
+    object QryPesquisaMOV_TOTALSERVICOS: TFloatField
+      FieldName = 'MOV_TOTALSERVICOS'
+      Origin = 'MOV_TOTALSERVICOS'
+    end
+    object QryPesquisaMOV_ACRESCIMO: TFloatField
+      FieldName = 'MOV_ACRESCIMO'
+      Origin = 'MOV_ACRESCIMO'
+    end
+    object QryPesquisaMOV_DESCONTO: TFloatField
+      FieldName = 'MOV_DESCONTO'
+      Origin = 'MOV_DESCONTO'
+    end
+    object QryPesquisaMOV_FRETE: TFloatField
+      FieldName = 'MOV_FRETE'
+      Origin = 'MOV_FRETE'
+    end
+    object QryPesquisaMOV_QTDEITENS: TSingleField
+      FieldName = 'MOV_QTDEITENS'
+      Origin = 'MOV_QTDEITENS'
+    end
+    object QryPesquisaMOV_VALORFINAL: TFloatField
+      FieldName = 'MOV_VALORFINAL'
+      Origin = 'MOV_VALORFINAL'
+    end
+  end
+  object RelVenda: TfrxReport
+    Version = '2023.2'
+    DataSet = RelDTSVenda
+    DataSetName = 'RelDTSVenda'
+    DotMatrixReport = False
+    IniFile = '\Software\Fast Reports'
+    PreviewOptions.Buttons = [pbPrint, pbLoad, pbSave, pbExport, pbZoom, pbFind, pbOutline, pbPageSetup, pbTools, pbEdit, pbNavigator, pbExportQuick, pbCopy, pbSelection]
+    PreviewOptions.Zoom = 1.000000000000000000
+    PrintOptions.Printer = 'Default'
+    PrintOptions.PrintOnSheet = 0
+    ReportOptions.CreateDate = 45067.650681342590000000
+    ReportOptions.LastChange = 45067.650681342590000000
+    ScriptLanguage = 'PascalScript'
+    ScriptText.Strings = (
+      'begin'
+      ''
+      'end.')
+    Left = 968
+    Top = 288
+    Datasets = <>
+    Variables = <>
+    Style = <>
+  end
+  object RelDTSVenda: TfrxDBDataset
+    UserName = 'RelDTSVenda'
+    CloseDataSource = False
+    DataSet = QryPesquisa
+    BCDToCurrency = False
+    DataSetOptions = []
+    Left = 920
+    Top = 288
+  end
+end
